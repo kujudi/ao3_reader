@@ -418,6 +418,34 @@
   }
   .kudos-btn:hover { background: var(--red-dark); }
 
+  /* AO3风格操作按钮栏：元数据框下方，靠右排列 */
+  .work-nav-bar {
+    display: none;                        /* 默认隐藏，进入阅读页才显示 */
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 40px;
+    background: var(--bg-page);
+  }
+  .work-nav-bar .wnb-btn {
+    background: linear-gradient(to top, #d8d8d8, #ffffff);
+    border: 1px solid #b0b0b0;
+    color: var(--text);
+    font-size: 13px;
+    font-family: var(--font-sans);
+    padding: 6px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+  .work-nav-bar .wnb-btn:hover {
+    background: linear-gradient(to top, #c8c8c8, #f0f0f0);
+  }
+  .work-nav-bar .wnb-btn:hover {
+    background: #e8e8e0;
+  }
+
   /* Back btn */
   .back-link {
     display: inline-block; font-size: 12px; color: var(--link);
@@ -476,6 +504,17 @@
 </nav>
 
 <div id="outer">
+
+  <!-- AO3风格操作按钮栏：导航栏和元数据框之间，靠右排列 -->
+  <div class="work-nav-bar" id="work-nav-bar">
+    <button class="wnb-btn" id="wnb-entire">Entire Work</button>
+    <button class="wnb-btn" id="wnb-prev">← Previous Chapter</button>
+    <button class="wnb-btn" id="wnb-next">Next Chapter →</button>
+    <button class="wnb-btn" id="wnb-index">Chapter Index ↓</button>
+    <button class="wnb-btn" id="wnb-comments">Comments</button>
+    <button class="wnb-btn" id="wnb-share">Share</button>
+    <button class="wnb-btn" id="wnb-download">Download ↓</button>
+  </div>
 
   <!-- 作品元数据框：独立于#inner之外，宽度跟着#outer走，用padding贴边 -->
   <div class="work-meta-wrap" id="work-meta-wrap" style="display:none">
@@ -1026,6 +1065,13 @@
     document.getElementById('chapter-nav-top').style.display = showNav ? '' : 'none';
     document.querySelector('.chapter-nav-bottom').style.display = showNav ? '' : 'none';
 
+    // ── 按钮栏显隐控制 ──
+    // Previous/Next 按钮：单章时不显示；多章时按位置决定
+    document.getElementById('wnb-prev').style.display = (!isFirst && showNav) ? '' : 'none';
+    document.getElementById('wnb-next').style.display = (!isLast  && showNav) ? '' : 'none';
+    // Chapter Index 按钮：单章时也不需要
+    document.getElementById('wnb-index').style.display = showNav ? '' : 'none';
+
     document.getElementById('chapter-heading').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -1095,6 +1141,7 @@
     document.getElementById('upload-section').style.display = 'none';
     document.getElementById('work-section').style.display  = 'block';
     document.getElementById('work-meta-wrap').style.display = 'block';
+    document.getElementById('work-nav-bar').style.display = 'flex';   // 进入阅读页才显示按钮栏
     document.getElementById('breadcrumb').innerHTML = '';
     document.getElementById('inner').classList.add('reading-mode');   // 切换到阅读布局（全宽）
     window.scrollTo(0, 0);
@@ -1104,6 +1151,7 @@
     document.getElementById('upload-section').style.display = 'block';
     document.getElementById('work-section').style.display  = 'none';
     document.getElementById('work-meta-wrap').style.display = 'none';
+    document.getElementById('work-nav-bar').style.display = 'none';   // 回上传页时隐藏按钮栏
     document.getElementById('breadcrumb').innerHTML =
       `<a href="#" onclick="showUpload(); return false;">Home</a> &rsaquo; 上传文章`;
     document.getElementById('inner').classList.remove('reading-mode'); // 恢复上传页布局（居中限宽）
