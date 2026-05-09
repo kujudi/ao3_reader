@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>阅读器 · Archive of Our Own</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --red: #990000;
+    --red-dark: #700000;
+    --red-nav: #800000;
+    --bg-page: #ffffff;
+    --bg-inner: #f5f5f0;
+    --border: #dddddd;
+    --border-light: #e0e0e0;
+    --text: #2a2a2a;
+    --text-muted: #666666;
+    --text-hint: #999999;
+    --link: #2a5a8e;
+    --link-red: #990000;
+    --tag-bg: #e8e8e4;
+    --tag-border: #c8c8c0;
+    --tag-free-bg: #e8f4f8;
+    --tag-free-border: #90c8d8;
+    --tag-free-text: #1a6080;
+    --font-serif: Georgia, 'Times New Roman', serif;
+    --font-sans: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  }
+
+  body {
+    background: var(--bg-page);
+    font-family: var(--font-sans);
+    color: var(--text);
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── HEADER ── */
+  /* 顶部白色区域，logo在此 */
+  #header {
+    background: white;
+    padding: 10px 0 8px;
+    border-bottom: none;
+    text-align: left;
+  }
+  .header-inner {
+    padding: 0 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .header-logo-wrap {
+    display: flex; align-items: center; gap: 10px;
+  }
+  /* AO3 logo：白背景上的红色小图标 */
+  .logo-svg {
+    width: 36px; height: 36px;
+    flex-shrink: 0;
+  }
+  .logo-svg svg { width: 36px; height: 36px; }
+  .site-title {
+    color: var(--red);                /* 白色背景上用红色文字，和真实AO3一致 */
+    font-family: var(--font-serif);
+    font-size: 22px; font-weight: bold;
+    letter-spacing: 0.5px;
+    line-height: 1;
+    text-decoration: none;
+  }
+  .site-title:hover { text-decoration: none; }
+
+  /* 主导航栏：深红色，在header下方 */
+  .primary-nav {
+    background: var(--red-nav);
+    border-bottom: 2px solid #550000;
+  }
+  .primary-nav ul {
+    padding: 0 20px;
+    display: flex; list-style: none; align-items: stretch;
+  }
+  .primary-nav li { position: relative; }
+  .primary-nav a {
+    color: white; text-decoration: none;
+    font-size: 14px; padding: 9px 16px;
+    display: block; white-space: nowrap;
+    font-family: var(--font-sans);
+    font-weight: bold;
+  }
+  .primary-nav a:hover { background: #660000; color: white; text-decoration: none; }
+  .primary-nav .new-work-btn {
+    margin-left: auto;
+    color: #ffcccc;
+  }
+
+  /* ── OUTER / INNER WRAPPER ── */
+  /* #outer 全宽，不再限制最大宽度 */
+  #outer { width: 100%; }
+
+  /* 默认状态（上传页）：居中 + 限制最大宽度 */
+  #inner {
+    display: flex; gap: 0; align-items: flex-start;
+    padding: 0 20px 60px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  #main { flex: 1; min-width: 0; padding-top: 16px; }
+
+  /* 阅读模式：#inner 取消居中限宽，变全宽，padding清零 */
+  #inner.reading-mode {
+    max-width: 100%;
+    margin: 0;
+    padding: 0 0 60px;
+  }
+
+  /* ── BREADCRUMB ── */
+  .breadcrumb {
+    font-size: 12px; color: var(--text-muted);
+    padding: 6px 0 10px;
+    margin-bottom: 12px;
+  }
+  .breadcrumb a { color: var(--link); }
+
+  /* ── UPLOAD SECTION ── */
+  #upload-section {
+    background: var(--bg-inner);
+    border: 1px solid var(--border);
+  }
+
+  .section-header {
+    background: var(--red);
+    color: white;
+    padding: 8px 16px;
+    font-size: 13px; font-weight: bold;
+    letter-spacing: 0.3px;
+  }
+  .section-body { padding: 20px 16px; }
+
+  .drop-zone {
+    border: 2px dashed #bbb;
+    background: #fafaf8;
+    padding: 30px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    border-radius: 2px;
+  }
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--red); background: #fff5f5;
+  }
+  .drop-icon { font-size: 32px; margin-bottom: 8px; }
+  .drop-label { font-size: 14px; color: var(--text-muted); margin-bottom: 4px; }
+  .drop-hint { font-size: 11px; color: var(--text-hint); }
+  .upload-btn {
+    display: inline-block; margin-top: 12px;
+    background: var(--red); color: white;
+    border: none; padding: 6px 18px; font-size: 12px;
+    border-radius: 2px; cursor: pointer; font-family: var(--font-sans);
+  }
+  .upload-btn:hover { background: var(--red-dark); }
+
+  #file-info {
+    display: none; margin-top: 10px;
+    font-size: 12px; color: var(--text-muted);
+    padding: 7px 12px; background: #f0f0eb;
+    border: 1px solid var(--border); border-radius: 2px;
+  }
+  #file-info strong { color: var(--text); }
+
+  /* 表单 */
+  .meta-form { margin-top: 18px; }
+  .form-section-title {
+    font-size: 11px; font-weight: bold; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--text-muted);
+    border-bottom: 1px solid var(--border); padding-bottom: 4px;
+    margin: 16px 0 10px;
+  }
+  .form-section-title:first-child { margin-top: 0; }
+  .form-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .form-grid .full { grid-column: 1 / -1; }
+  .field label {
+    display: block; font-size: 11px; font-weight: bold;
+    color: var(--text-muted); margin-bottom: 3px;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .field label .optional {
+    font-weight: normal; text-transform: none; letter-spacing: 0;
+    color: var(--text-hint); font-size: 10px;
+  }
+  .field input, .field textarea, .field select {
+    width: 100%; border: 1px solid #ccc; background: white;
+    padding: 6px 8px; font-size: 13px;
+    font-family: var(--font-sans); color: var(--text);
+    border-radius: 2px; outline: none;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    border-color: var(--red); box-shadow: 0 0 0 2px rgba(153,0,0,0.08);
+  }
+  .field textarea { resize: vertical; min-height: 60px; }
+  .field .hint { font-size: 10px; color: var(--text-hint); margin-top: 2px; }
+
+  .render-btn {
+    margin-top: 16px;
+    background: var(--red); color: white; border: none;
+    padding: 8px 24px; font-size: 13px; border-radius: 2px;
+    cursor: pointer; font-family: var(--font-sans);
+    font-weight: bold;
+  }
+  .render-btn:hover { background: var(--red-dark); }
+  .render-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+  /* ── WORK PAGE ── */
+  /* 阅读页正文区：居中 + 限制最大宽度，独立于元数据框 */
+  #work-section {
+    display: none;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* 顶部操作栏（仿AO3 work navigation actions） */
+  .work-actions {
+    background: var(--bg-inner);
+    border: 1px solid var(--border);
+    margin-bottom: 12px;
+    padding: 0;
+  }
+  .work-actions h3 {
+    background: var(--red); color: white;
+    font-size: 12px; padding: 5px 12px;
+    letter-spacing: 0.3px;
+  }
+  .work-actions ul {
+    list-style: none; display: flex; flex-wrap: wrap;
+    padding: 0; margin: 0; gap: 0;
+  }
+  .work-actions li { border-right: 1px solid var(--border); }
+  .work-actions li a, .work-actions li button {
+    display: block; padding: 7px 14px;
+    font-size: 12px; color: var(--link);
+    text-decoration: none; background: none; border: none;
+    cursor: pointer; font-family: var(--font-sans);
+    white-space: nowrap;
+  }
+  .work-actions li a:hover, .work-actions li button:hover {
+    background: #eee; text-decoration: underline;
+  }
+
+  /* 作品元数据框：全宽显示，左右各留 40px 间距 */
+  .work-meta-wrap {
+    background: var(--bg-white, #ffffff);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 16px 20px;
+    margin: 0 40px 0 40px;
+    box-shadow: 1px 2px 6px rgba(0,0,0,0.10);
+  }
+  .work-title-block { margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+  .work-title {
+    font-family: var(--font-serif); font-size: 20px;
+    color: var(--text); line-height: 1.3; margin-bottom: 4px;
+  }
+  .work-byline { font-size: 13px; color: var(--text-muted); }
+  .work-byline a { color: var(--link-red); }
+
+  dl.work-meta {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 10px;
+    font-size: 13px;
+    align-items: baseline;
+  }
+  dl.work-meta dt {
+    font-weight: bold; color: var(--text-muted);
+    white-space: nowrap;
+    padding-right: 4px;
+    text-align: right;
+  }
+  dl.work-meta dd { color: var(--text); }
+  dl.work-meta dd ul { list-style: none; display: flex; flex-wrap: wrap; gap: 4px; }
+  dl.work-meta dd ul li { display: inline; }
+  dl.work-meta dd ul li::after { content: ',\00a0'; color: var(--text-muted); }
+  dl.work-meta dd ul li:last-child::after { content: ''; }
+
+  .tag-link {
+    display: inline-block;
+    background: var(--tag-bg); border: 1px solid var(--tag-border);
+    color: var(--text); padding: 1px 6px; border-radius: 2px;
+    font-size: 12px; text-decoration: none; white-space: nowrap;
+    margin: 1px 2px 1px 0;
+  }
+  .tag-link:hover { background: #d8d8d0; text-decoration: none; }
+  .tag-link.freeform {
+    background: var(--tag-free-bg); border-color: var(--tag-free-border);
+    color: var(--tag-free-text);
+  }
+  .tag-link.freeform:hover { background: #d0e8f0; }
+  .tag-link.rating { background: #e8f0e8; border-color: #90b890; color: #2a6a2a; }
+  .tag-link.warning { background: #f5ebe8; border-color: #d89080; color: #7a3020; }
+  .tag-link.category { background: #f0e8f5; border-color: #b090c8; color: #5a2a7a; }
+
+  /* Stats 横排 */
+  dl.work-stats {
+    display: flex; flex-wrap: wrap; gap: 0;
+    font-size: 12px; margin-top: 10px;
+    border-top: 1px solid var(--border); padding-top: 8px;
+  }
+  dl.work-stats dt { font-weight: bold; color: var(--text-muted); margin-right: 3px; }
+  dl.work-stats dd {
+    color: var(--text); margin-right: 14px;
+    display: flex; align-items: center; gap: 3px;
+  }
+  dl.work-stats dd::after { content: ''; }
+
+  /* Summary / Notes 模块 */
+  .preface-module {
+    background: var(--bg-inner);
+    border: 1px solid var(--border);
+    border-left: 4px solid #cccccc;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+  }
+  .preface-module h3 {
+    font-size: 12px; font-weight: bold; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px;
+  }
+  .preface-module.summary { border-left-color: var(--red); }
+  .preface-module blockquote {
+    font-family: var(--font-serif); font-size: 14px;
+    color: #444; line-height: 1.75;
+    padding-left: 12px; border-left: 2px solid #ddd;
+  }
+
+  /* 阅读设置 */
+  .settings-bar {
+    background: #f0f0eb; border: 1px solid var(--border); border-bottom: none;
+    padding: 7px 14px; display: flex; align-items: center; gap: 16px;
+    font-size: 12px; color: var(--text-muted); flex-wrap: wrap;
+  }
+  .settings-bar label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+  .settings-bar select {
+    border: 1px solid #ccc; background: white; font-size: 12px;
+    padding: 2px 5px; border-radius: 2px; cursor: pointer;
+  }
+  .settings-bar input[type="range"] { width: 72px; cursor: pointer; }
+
+  /* 章节导航 */
+  .chapter-nav {
+    background: var(--bg-inner); border: 1px solid var(--border); border-bottom: none;
+    padding: 8px 14px;
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  }
+  .chapter-nav select {
+    border: 1px solid #ccc; background: var(--bg-page); color: var(--text);
+    font-size: 12px; padding: 3px 6px; border-radius: 2px; cursor: pointer;
+    max-width: 260px; font-family: var(--font-sans);
+  }
+  .nav-btn {
+    color: var(--link); font-size: 12px; padding: 4px 12px;
+    border: 1px solid var(--border); border-radius: 2px;
+    background: var(--bg-page); cursor: pointer; font-family: var(--font-sans);
+    white-space: nowrap; text-decoration: none; display: inline-block;
+  }
+  .nav-btn:hover { background: var(--red); color: white; border-color: var(--red); text-decoration: none; }
+  .nav-btn:disabled { color: #aaa; background: var(--bg-inner); border-color: #ddd; cursor: default; }
+
+  /* 正文区 */
+  .chapter-content {
+    background: white; border: 1px solid var(--border);
+    padding: 32px 44px;
+  }
+  .work-text-heading {
+    font-size: 12px; font-weight: bold; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 6px;
+  }
+  .chapter-heading {
+    font-family: var(--font-serif); font-size: 16px; color: var(--text);
+    margin-bottom: 18px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .chapter-body { font-family: var(--font-serif); }
+  .chapter-body p {
+    font-size: 16px; line-height: 1.85; color: var(--text);
+    margin-bottom: 1.3em; text-align: justify;
+  }
+  .chapter-body p:last-child { margin-bottom: 0; }
+  .chapter-body h1, .chapter-body h2, .chapter-body h3 {
+    margin: 1.5em 0 0.5em; font-family: var(--font-serif);
+  }
+
+  .chapter-nav-bottom {
+    background: var(--bg-inner); border: 1px solid var(--border); border-top: none;
+    padding: 8px 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; color: var(--text-hint);
+  }
+
+  /* Kudos */
+  .kudos-section {
+    background: var(--bg-inner); border: 1px solid var(--border);
+    border-top: 3px solid var(--red);
+    margin-top: 18px; padding: 16px;
+    text-align: center;
+  }
+  .kudos-section p { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+  .kudos-section .kudos-count {
+    font-size: 12px; color: var(--text-hint); margin-top: 8px;
+  }
+  .kudos-btn {
+    background: var(--red); color: white; border: none;
+    padding: 6px 18px; font-size: 13px; border-radius: 2px;
+    cursor: pointer; font-family: var(--font-sans);
+  }
+  .kudos-btn:hover { background: var(--red-dark); }
+
+  /* Back btn */
+  .back-link {
+    display: inline-block; font-size: 12px; color: var(--link);
+    padding: 5px 10px; border: 1px solid var(--border);
+    background: var(--bg-inner); border-radius: 2px;
+    margin-bottom: 12px; text-decoration: none;
+  }
+  .back-link:hover { background: #e8e8e0; text-decoration: none; }
+
+  /* FOOTER */
+  #footer {
+    background: #333; color: #999; font-size: 11px;
+    text-align: center; padding: 14px; margin-top: 30px;
+  }
+  #footer a { color: #bbb; }
+
+  /* Responsive */
+  @media (max-width: 620px) {
+    #inner { padding: 0 12px 40px; }
+    .chapter-content { padding: 18px 16px; }
+    .form-grid { grid-template-columns: 1fr; }
+    dl.work-meta { grid-template-columns: 1fr; }
+    dl.work-meta dt { text-align: left; }
+    .chapter-nav { flex-direction: column; gap: 6px; text-align: center; }
+    .header-search { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div id="header">
+  <div class="header-inner">
+    <div class="header-logo-wrap">
+      <div class="logo-svg">
+        <svg viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="21" cy="21" r="21" fill="#990000"/>
+          <circle cx="21" cy="13" r="4" fill="white"/>
+          <path d="M13 30 Q13 22 21 22 Q29 22 29 30" fill="white"/>
+        </svg>
+      </div>
+      <a href="#" class="site-title" onclick="showUpload(); return false;">Archive of Our Own</a>
+    </div>
+  </div>
+</div>
+
+<!-- 主导航 -->
+<nav class="primary-nav" aria-label="主导航">
+  <ul>
+    <li><a href="#">Fandoms</a></li>
+    <li><a href="#">Browse</a></li>
+    <li><a href="#">Search</a></li>
+    <li><a href="#">About</a></li>
+    <li><a href="#" class="new-work-btn" id="new-btn" onclick="showUpload(); return false;">+ 上传新文章</a></li>
+  </ul>
+</nav>
+
+<div id="outer">
+
+  <!-- 作品元数据框：独立于#inner之外，宽度跟着#outer走，用padding贴边 -->
+  <div class="work-meta-wrap" id="work-meta-wrap" style="display:none">
+    <div class="work-title-block">
+      <div class="work-title" id="disp-title"></div>
+      <div class="work-byline">by <a href="#" id="disp-author-link"><span id="disp-author"></span></a></div>
+    </div>
+    <dl class="work-meta" id="disp-meta"></dl>
+    <dl class="work-stats" id="disp-stats"></dl>
+  </div>
+
+  <div id="inner">
+    <div id="main">
+
+      <!-- 面包屑 -->
+      <div class="breadcrumb" id="breadcrumb">
+        <a href="#" onclick="showUpload(); return false;">Home</a> &rsaquo; 上传文章
+      </div>
+
+      <!-- ── 上传页 ── -->
+      <div id="upload-section">
+        <div class="section-header">上传文章</div>
+        <div class="section-body">
+
+          <!-- 文件拖放区 -->
+          <div class="drop-zone" id="drop-zone">
+            <div class="drop-icon">📄</div>
+            <div class="drop-label">拖拽文件到此处，或点击选择文件</div>
+            <div class="drop-hint">支持 .txt · .md · .epub 格式</div>
+            <button type="button" class="upload-btn" id="upload-btn-trigger">选择文件</button>
+            <input type="file" id="file-input" accept=".txt,.md,.epub" style="display:none">
+          </div>
+
+          <div id="file-info">
+            已选择：<strong id="file-name"></strong>
+            <span id="file-size" style="margin-left:6px;"></span>
+          </div>
+
+          <!-- 元数据表单 -->
+          <div class="meta-form">
+
+            <div class="form-section-title">基本信息</div>
+            <div class="form-grid">
+              <div class="field full">
+                <label>标题 <span class="optional">（留空将使用文件名）</span></label>
+                <input type="text" id="meta-title" placeholder="作品标题">
+              </div>
+              <div class="field">
+                <label>作者 <span class="optional">（选填）</span></label>
+                <input type="text" id="meta-author" placeholder="作者名">
+              </div>
+              <div class="field">
+                <label>评级 Rating</label>
+                <select id="meta-rating">
+                  <option value="">— 不填 —</option>
+                  <option value="G">G · General Audiences</option>
+                  <option value="T">T · Teen And Up Audiences</option>
+                  <option value="M">M · Mature</option>
+                  <option value="E">E · Explicit</option>
+                </select>
+              </div>
+              <div class="field full">
+                <label>简介 Summary <span class="optional">（选填）</span></label>
+                <textarea id="meta-summary" placeholder="作品简介"></textarea>
+              </div>
+              <div class="field full">
+                <label>作者注 Notes <span class="optional">（选填）</span></label>
+                <textarea id="meta-notes" placeholder="作者注（显示在正文前）"></textarea>
+              </div>
+            </div>
+
+            <div class="form-section-title">标签 Tags <span style="font-weight:normal;font-size:10px;color:var(--text-hint);text-transform:none;letter-spacing:0">（以下全部选填，逗号或顿号分隔）</span></div>
+            <div class="form-grid">
+              <div class="field">
+                <label>Archive Warning</label>
+                <input type="text" id="meta-warning" placeholder="例：Major Character Death">
+              </div>
+              <div class="field">
+                <label>Category</label>
+                <input type="text" id="meta-category" placeholder="例：M/M, F/F, Gen">
+              </div>
+              <div class="field">
+                <label>Fandom</label>
+                <input type="text" id="meta-fandom" placeholder="例：三国历史 RPF">
+              </div>
+              <div class="field">
+                <label>Relationship</label>
+                <input type="text" id="meta-relationship" placeholder="例：曹操/袁绍">
+              </div>
+              <div class="field">
+                <label>Character</label>
+                <input type="text" id="meta-character" placeholder="例：曹操, 袁绍">
+              </div>
+              <div class="field">
+                <label>Additional Tags</label>
+                <input type="text" id="meta-tags" placeholder="例：慢热, HE, 古风">
+              </div>
+            </div>
+
+            <div class="form-section-title">章节设置</div>
+            <div class="form-grid">
+              <div class="field full" id="sep-field">
+                <label>章节分隔符 <span class="optional">（选填，整篇视为一章）</span></label>
+                <input type="text" id="meta-sep" placeholder="例：第X章 · 或 === 或 ---">
+                <div class="hint">填入的字符串会作为章节起始标记，支持正则</div>
+              </div>
+            </div>
+
+          </div><!-- /meta-form -->
+
+          <button class="render-btn" id="render-btn" onclick="renderWork()" disabled>渲 染</button>
+
+        </div><!-- /section-body -->
+      </div><!-- /upload-section -->
+
+
+      <!-- ── 阅读页 ── -->
+      <div id="work-section">
+
+        <!-- Summary 模块 -->
+        <div class="preface-module summary" id="disp-summary-box" style="display:none">
+          <h3>Summary:</h3>
+          <blockquote id="disp-summary"></blockquote>
+        </div>
+
+        <!-- Notes 模块 -->
+        <div class="preface-module" id="disp-notes-box" style="display:none">
+          <h3>Notes:</h3>
+          <blockquote id="disp-notes"></blockquote>
+        </div>
+
+        <!-- 阅读设置栏 -->
+        <div class="settings-bar">
+          <label>字号
+            <input type="range" id="font-size-range" min="13" max="22" value="16"
+              oninput="document.querySelector('.chapter-body').style.fontSize=this.value+'px'">
+          </label>
+          <label>行距
+            <select onchange="document.querySelector('.chapter-body').style.lineHeight=this.value">
+              <option value="1.6">紧凑</option>
+              <option value="1.85" selected>舒适</option>
+              <option value="2.2">宽松</option>
+            </select>
+          </label>
+          <label>字体
+            <select onchange="document.querySelector('.chapter-body').style.fontFamily=this.value">
+              <option value="Georgia,'Times New Roman',serif">宋体风格</option>
+              <option value="'PingFang SC','Microsoft YaHei',sans-serif">黑体风格</option>
+              <option value="'Kaiti SC','KaiTi',Georgia,serif">楷体风格</option>
+            </select>
+          </label>
+        </div>
+
+        <!-- 章节导航（上） -->
+        <div class="chapter-nav" id="chapter-nav-top">
+          <button class="nav-btn" id="prev-btn-top" onclick="goChapter(-1)">‹ Previous Chapter</button>
+          <select id="chapter-select" onchange="goToChapter(parseInt(this.value))"></select>
+          <button class="nav-btn" id="next-btn-top" onclick="goChapter(1)">Next Chapter ›</button>
+        </div>
+
+        <!-- 正文 -->
+        <div class="chapter-content">
+          <div class="work-text-heading">Work Text:</div>
+          <h2 class="chapter-heading" id="chapter-heading"></h2>
+          <div class="chapter-body" id="chapter-body"></div>
+        </div>
+
+        <!-- 章节导航（下） -->
+        <div class="chapter-nav-bottom">
+          <button class="nav-btn" id="prev-btn-bottom" onclick="goChapter(-1)">‹ Previous Chapter</button>
+          <span id="chapter-progress"></span>
+          <button class="nav-btn" id="next-btn-bottom" onclick="goChapter(1)">Next Chapter ›</button>
+        </div>
+
+        <!-- Kudos区 -->
+        <div class="kudos-section">
+          <p>喜欢这篇作品？留下一个 Kudos 吧！</p>
+          <button class="kudos-btn" id="kudos-btn" onclick="doKudos()">♡ Kudos</button>
+          <div class="kudos-count" id="kudos-count"></div>
+        </div>
+
+      </div><!-- /work-section -->
+
+    </div><!-- /main -->
+  </div><!-- /inner -->
+</div><!-- /outer -->
+
+<div id="footer">
+  <p>Archive Style Reader · 个人阅读工具 · 文件在本地处理，不上传至任何服务器</p>
+  <p style="margin-top:4px"><a href="#">Terms of Service</a> · <a href="#">Privacy Policy</a> · <a href="#">Contact</a></p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+  let chapters = [];
+  let currentChapter = 0;
+  let rawText = '';
+  let epubChapters = null;
+  let kudosGiven = false;
+
+  // ── 文件处理 ──
+  const dropZone = document.getElementById('drop-zone');
+  const fileInput = document.getElementById('file-input');
+
+  document.getElementById('upload-btn-trigger').addEventListener('click', e => {
+    e.preventDefault(); e.stopPropagation();
+    requestAnimationFrame(() => fileInput.click());
+  });
+
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault(); dropZone.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f) handleFile(f);
+  });
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) handleFile(fileInput.files[0]);
+    fileInput.value = '';
+  });
+
+  function handleFile(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!['txt','md','epub'].includes(ext)) {
+      alert('请上传 .txt、.md 或 .epub 文件');
+      return;
+    }
+    epubChapters = null;
+    // epub 不需要分隔符字段
+    document.getElementById('sep-field').style.display = ext === 'epub' ? 'none' : '';
+
+    if (ext === 'epub') {
+      handleEpub(file);
+    } else {
+      handleText(file);
+    }
+  }
+
+  function handleText(file) {
+    const binReader = new FileReader();
+    binReader.onload = e => {
+      const bytes = new Uint8Array(e.target.result);
+      const encoding = detectEncoding(bytes);
+      const textReader = new FileReader();
+      textReader.onload = te => {
+        rawText = te.target.result;
+        const encHint = encoding !== 'UTF-8' ? ` · 已自动转换编码（${encoding}）` : '';
+        setFileInfo(file.name, formatSize(file.size) + encHint);
+        // 自动填标题
+        if (!document.getElementById('meta-title').value)
+          document.getElementById('meta-title').value = file.name.replace(/\.(txt|md)$/i, '');
+      };
+      textReader.readAsText(file, encoding);
+    };
+    binReader.readAsArrayBuffer(file);
+  }
+
+  async function handleEpub(file) {
+    setFileInfo(file.name, '解析中…');
+    try {
+      const arrayBuf = await file.arrayBuffer();
+      const zip = await JSZip.loadAsync(arrayBuf);
+
+      // 读 container.xml → OPF 路径
+      const containerXml = await zip.file('META-INF/container.xml').async('string');
+      const opfPath = containerXml.match(/full-path="([^"]+\.opf)"/i)?.[1];
+      if (!opfPath) throw new Error('找不到 OPF 文件');
+
+      const opfDir = opfPath.includes('/') ? opfPath.slice(0, opfPath.lastIndexOf('/') + 1) : '';
+      const opfXml = await zip.file(opfPath).async('string');
+
+      // 解析元数据
+      const metaTitle  = opfXml.match(/<dc:title[^>]*>([^<]+)<\/dc:title>/i)?.[1]?.trim() || '';
+      const metaAuthor = opfXml.match(/<dc:creator[^>]*>([^<]+)<\/dc:creator>/i)?.[1]?.trim() || '';
+
+      // manifest id→href
+      const manifest = {};
+      for (const m of opfXml.matchAll(/<item\s([^>]*\/?>)/gi)) {
+        const attrs = m[1];
+        const idM   = attrs.match(/\bid="([^"]+)"/);
+        const hrefM = attrs.match(/\bhref="([^"]+)"/);
+        const typeM = attrs.match(/\bmedia-type="([^"]+)"/);
+        if (idM && hrefM) manifest[idM[1]] = { href: hrefM[1], type: typeM?.[1] || '' };
+      }
+
+      // spine 顺序
+      const spineIds = [...opfXml.matchAll(/<itemref\s[^>]*idref="([^"]+)"/gi)].map(m => m[1]);
+
+      // 提取章节
+      epubChapters = [];
+      for (const id of spineIds) {
+        const item = manifest[id];
+        if (!item) continue;
+        if (item.type && !item.type.includes('html') && !item.type.includes('xhtml')) continue;
+        const fullPath = opfDir + item.href.split('#')[0];
+        const fileObj = zip.file(fullPath) || zip.file(decodeURIComponent(fullPath));
+        if (!fileObj) continue;
+        const html = await fileObj.async('string');
+        const parsed = parseEpubHtml(html);
+        if (parsed.text.trim().length < 20) continue;
+        epubChapters.push(parsed);
+      }
+
+      if (epubChapters.length === 0) throw new Error('未能提取到正文章节');
+
+      if (metaTitle && !document.getElementById('meta-title').value)
+        document.getElementById('meta-title').value = metaTitle;
+      if (metaAuthor && !document.getElementById('meta-author').value)
+        document.getElementById('meta-author').value = metaAuthor;
+
+      setFileInfo(file.name, `${formatSize(file.size)} · epub · ${epubChapters.length} 章`);
+    } catch (err) {
+      setFileInfo(file.name, '⚠ 解析失败：' + err.message);
+      epubChapters = null;
+      document.getElementById('render-btn').disabled = true;
+    }
+  }
+
+  function parseEpubHtml(html) {
+    const titleMatch = html.match(/<(?:h[123])[^>]*>([\s\S]*?)<\/h[123]>/i);
+    let title = titleMatch ? stripTags(titleMatch[1]).trim() : '';
+    if (!title) title = html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]?.trim() || '';
+
+    const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+    const bodyHtml = bodyMatch ? bodyMatch[1] : html;
+
+    const cleaned = bodyHtml
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n\n')
+      .replace(/<\/div>/gi, '\n')
+      .replace(/<\/h[1-6]>/gi, '\n\n')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+      .replace(/&[a-z]+;/gi, '');
+
+    return { title, text: cleaned };
+  }
+
+  function setFileInfo(name, sizeStr) {
+    document.getElementById('file-name').textContent = name;
+    document.getElementById('file-size').textContent = sizeStr;
+    document.getElementById('file-info').style.display = 'block';
+    document.getElementById('render-btn').disabled = false;
+  }
+
+  function detectEncoding(bytes) {
+    if (bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) return 'UTF-8';
+    if (bytes[0] === 0xFF && bytes[1] === 0xFE) return 'UTF-16LE';
+    if (bytes[0] === 0xFE && bytes[1] === 0xFF) return 'UTF-16BE';
+    let i = 0, isValidUTF8 = true;
+    while (i < Math.min(bytes.length, 4000)) {
+      const b = bytes[i];
+      let extra = 0;
+      if (b <= 0x7F) { i++; continue; }
+      else if (b >= 0xC2 && b <= 0xDF) extra = 1;
+      else if (b >= 0xE0 && b <= 0xEF) extra = 2;
+      else if (b >= 0xF0 && b <= 0xF4) extra = 3;
+      else { isValidUTF8 = false; break; }
+      for (let j = 1; j <= extra; j++) {
+        if (i + j >= bytes.length || (bytes[i+j] & 0xC0) !== 0x80) { isValidUTF8 = false; break; }
+      }
+      if (!isValidUTF8) break;
+      i += 1 + extra;
+    }
+    if (isValidUTF8) return 'UTF-8';
+    let gbkPairs = 0;
+    for (let k = 0; k < Math.min(bytes.length - 1, 2000); k++) {
+      if (bytes[k] >= 0x81 && bytes[k] <= 0xFE && bytes[k+1] >= 0x40 && bytes[k+1] <= 0xFE)
+        gbkPairs++;
+    }
+    return gbkPairs > 10 ? 'GBK' : 'UTF-8';
+  }
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+    return (bytes/1024/1024).toFixed(2) + ' MB';
+  }
+
+  // ── 渲染 ──
+  function renderWork() {
+    // 读取所有表单值，均为选填
+    const title        = document.getElementById('meta-title').value.trim() || '未命名作品';
+    const author       = document.getElementById('meta-author').value.trim() || 'Anonymous';
+    const rating       = document.getElementById('meta-rating').value;
+    const summary      = document.getElementById('meta-summary').value.trim();
+    const notes        = document.getElementById('meta-notes').value.trim();
+    const warningRaw   = document.getElementById('meta-warning').value.trim();
+    const categoryRaw  = document.getElementById('meta-category').value.trim();
+    const fandomRaw    = document.getElementById('meta-fandom').value.trim();
+    const relRaw       = document.getElementById('meta-relationship').value.trim();
+    const charRaw      = document.getElementById('meta-character').value.trim();
+    const tagsRaw      = document.getElementById('meta-tags').value.trim();
+
+    // 拆分标签的通用函数
+    const splitTags = str => str ? str.split(/[,，、]/).map(t => t.trim()).filter(Boolean) : [];
+
+    // 处理章节
+    if (epubChapters) {
+      chapters = epubChapters.map((ch, i) => ({
+        title: ch.title || `Chapter ${i + 1}`,
+        body: ch.text
+      }));
+    } else {
+      if (!rawText) return;
+      const sepRaw = document.getElementById('meta-sep').value.trim();
+      if (sepRaw) {
+        const sepRegex = new RegExp(`(?=^${escapeRegex(sepRaw)})`, 'mi');
+        chapters = rawText.split(sepRegex).map(s => s.trim()).filter(s => s.length > 10);
+        if (chapters.length === 0) chapters = [rawText];
+      } else {
+        chapters = [rawText];
+      }
+      chapters = chapters.map((text, i) => {
+        const firstLine = text.split('\n')[0].trim();
+        let chTitle = '';
+        if (firstLine.length < 60 && /第.{1,4}[章节幕]|chapter|part|\d+\./i.test(firstLine)) {
+          chTitle = firstLine;
+          text = text.slice(firstLine.length).trim();
+        } else {
+          chTitle = chapters.length === 1 ? '' : `Chapter ${i + 1}`;
+        }
+        return { title: chTitle, body: text };
+      });
+    }
+
+    // 统计数据
+    const fullText = epubChapters ? epubChapters.map(c => c.text).join('') : rawText;
+    const totalChars = fullText.replace(/\s/g, '').length;
+
+    // 填充标题 / 作者
+    document.getElementById('disp-title').textContent = title;
+    document.getElementById('disp-author').textContent = author;
+    document.title = title + ' - ' + author + ' [Archive of Our Own]';
+
+    // 构建 dl.work-meta
+    const metaDl = document.getElementById('disp-meta');
+    metaDl.innerHTML = '';
+
+    // 辅助：添加一行 dt+dd
+    function addMetaRow(labelText, tagsArr, cssClass) {
+      if (!tagsArr || tagsArr.length === 0) return;
+      const dt = document.createElement('dt');
+      dt.textContent = labelText + ':';
+      const dd = document.createElement('dd');
+      const ul = document.createElement('ul');
+      tagsArr.forEach(t => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.className = 'tag-link' + (cssClass ? ' ' + cssClass : '');
+        a.href = '#'; a.textContent = t;
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+      dd.appendChild(ul);
+      metaDl.appendChild(dt);
+      metaDl.appendChild(dd);
+    }
+
+    if (rating) {
+      addMetaRow('Rating', [ratingLabel(rating)], 'rating');
+    }
+    addMetaRow('Archive Warning', splitTags(warningRaw), 'warning');
+    addMetaRow('Category',        splitTags(categoryRaw), 'category');
+    addMetaRow('Fandom',          splitTags(fandomRaw), '');
+    addMetaRow('Relationship',    splitTags(relRaw), '');
+    addMetaRow('Characters',      splitTags(charRaw), '');
+    addMetaRow('Additional Tags', splitTags(tagsRaw), 'freeform');
+
+    // Stats
+    document.getElementById('disp-stats').innerHTML = `
+      <dt>Words:</dt><dd>${totalChars.toLocaleString('zh-CN')}</dd>
+      <dt>Chapters:</dt><dd>${chapters.length}/${chapters.length}</dd>
+    `;
+
+    // Summary / Notes
+    if (summary) {
+      document.getElementById('disp-summary').textContent = summary;
+      document.getElementById('disp-summary-box').style.display = 'block';
+    } else {
+      document.getElementById('disp-summary-box').style.display = 'none';
+    }
+    if (notes) {
+      document.getElementById('disp-notes').textContent = notes;
+      document.getElementById('disp-notes-box').style.display = 'block';
+    } else {
+      document.getElementById('disp-notes-box').style.display = 'none';
+    }
+
+    // 章节下拉
+    const sel = document.getElementById('chapter-select');
+    sel.innerHTML = '';
+    chapters.forEach((ch, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = ch.title || `Chapter ${i + 1}`;
+      sel.appendChild(opt);
+    });
+
+    // 重置kudos
+    kudosGiven = false;
+    document.getElementById('kudos-btn').textContent = '♡ Kudos';
+    document.getElementById('kudos-btn').style.background = '';
+    document.getElementById('kudos-btn').disabled = false;
+    document.getElementById('kudos-count').textContent = '';
+
+    currentChapter = 0;
+    displayChapter(0);
+    showWork();
+  }
+
+  function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function ratingLabel(r) {
+    return {
+      G: 'General Audiences',
+      T: 'Teen And Up Audiences',
+      M: 'Mature',
+      E: 'Explicit'
+    }[r] || r;
+  }
+
+  function displayChapter(idx) {
+    currentChapter = idx;
+    const ch = chapters[idx];
+    const total = chapters.length;
+
+    // 单章时隐藏导航里的章节标题行（标题直接为空）
+    document.getElementById('chapter-heading').textContent = ch.title || '';
+    document.getElementById('chapter-heading').style.display = ch.title ? 'block' : 'none';
+    document.getElementById('chapter-body').innerHTML = textToHtml(ch.body);
+    document.getElementById('chapter-progress').textContent =
+      total > 1 ? `Chapter ${idx + 1} of ${total}` : '';
+
+    document.getElementById('chapter-select').value = idx;
+
+    const isFirst = idx === 0, isLast = idx === total - 1;
+    ['prev-btn-top','prev-btn-bottom'].forEach(id => document.getElementById(id).disabled = isFirst);
+    ['next-btn-top','next-btn-bottom'].forEach(id => document.getElementById(id).disabled = isLast);
+
+    // 单章时隐藏章节导航
+    const showNav = total > 1;
+    document.getElementById('chapter-nav-top').style.display = showNav ? '' : 'none';
+    document.querySelector('.chapter-nav-bottom').style.display = showNav ? '' : 'none';
+
+    document.getElementById('chapter-heading').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function textToHtml(text) {
+    const lines = text.split('\n');
+    let html = '';
+    let para = [];
+
+    function flushPara() {
+      if (para.length) {
+        html += '<p>' + para.join('<br>') + '</p>\n';
+        para = [];
+      }
+    }
+
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        flushPara();
+      } else if (/^#{1,3}\s/.test(trimmed)) {
+        flushPara();
+        const level = trimmed.match(/^(#{1,3})/)[1].length;
+        html += `<h${level+1}>${escapeHtml(trimmed.replace(/^#{1,3}\s+/, ''))}</h${level+1}>\n`;
+      } else if (/^---+$|^===+$/.test(trimmed)) {
+        flushPara();
+        html += '<hr style="border:none;border-top:1px solid #ddd;margin:2em auto;width:33%">\n';
+      } else {
+        let l = escapeHtml(trimmed)
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.+?)\*/g, '<em>$1</em>');
+        para.push(l);
+      }
+    });
+    flushPara();
+    return html;
+  }
+
+  function stripTags(html) {
+    return html.replace(/<[^>]+>/g, '').replace(/&[a-z]+;/gi, ' ').trim();
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function goChapter(delta) {
+    const next = currentChapter + delta;
+    if (next >= 0 && next < chapters.length) displayChapter(next);
+  }
+
+  function goToChapter(idx) {
+    if (idx >= 0 && idx < chapters.length) displayChapter(idx);
+  }
+
+  function doKudos() {
+    if (kudosGiven) return;
+    kudosGiven = true;
+    const btn = document.getElementById('kudos-btn');
+    btn.textContent = '♥ Kudos Given!';
+    btn.style.background = '#555';
+    btn.disabled = true;
+    document.getElementById('kudos-count').textContent = '感谢你的支持！';
+  }
+
+  // ── 视图切换 ──
+  function showWork() {
+    document.getElementById('upload-section').style.display = 'none';
+    document.getElementById('work-section').style.display  = 'block';
+    document.getElementById('work-meta-wrap').style.display = 'block';
+    document.getElementById('breadcrumb').innerHTML = '';
+    document.getElementById('inner').classList.add('reading-mode');   // 切换到阅读布局（全宽）
+    window.scrollTo(0, 0);
+  }
+
+  function showUpload() {
+    document.getElementById('upload-section').style.display = 'block';
+    document.getElementById('work-section').style.display  = 'none';
+    document.getElementById('work-meta-wrap').style.display = 'none';
+    document.getElementById('breadcrumb').innerHTML =
+      `<a href="#" onclick="showUpload(); return false;">Home</a> &rsaquo; 上传文章`;
+    document.getElementById('inner').classList.remove('reading-mode'); // 恢复上传页布局（居中限宽）
+    document.title = '阅读器 · Archive of Our Own';
+    window.scrollTo(0, 0);
+  }
+
+  // 键盘翻章
+  document.addEventListener('keydown', e => {
+    if (document.getElementById('work-section').style.display === 'none') return;
+    if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) return;
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goChapter(-1);
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goChapter(1);
+  });
+</script>
+</body>
+</html>
