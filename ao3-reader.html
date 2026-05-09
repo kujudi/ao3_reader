@@ -41,7 +41,6 @@
   a:hover { text-decoration: underline; }
 
   /* ── HEADER ── */
-  /* 顶部白色区域，logo在此 */
   #header {
     background: white;
     padding: 10px 0 8px;
@@ -55,23 +54,18 @@
   .header-logo-wrap {
     display: flex; align-items: center; gap: 10px;
   }
-  /* AO3 logo：白背景上的红色小图标 */
-  .logo-svg {
-    width: 36px; height: 36px;
-    flex-shrink: 0;
-  }
+  .logo-svg { width: 36px; height: 36px; flex-shrink: 0; }
   .logo-svg svg { width: 36px; height: 36px; }
   .site-title {
-    color: var(--red);                /* 白色背景上用红色文字，和真实AO3一致 */
+    color: var(--red);
     font-family: var(--font-serif);
     font-size: 22px; font-weight: bold;
-    letter-spacing: 0.5px;
-    line-height: 1;
+    letter-spacing: 0.5px; line-height: 1;
     text-decoration: none;
   }
   .site-title:hover { text-decoration: none; }
 
-  /* 主导航栏：深红色，在header下方 */
+  /* 主导航栏 */
   .primary-nav {
     background: var(--red-nav);
     border-bottom: 2px solid #550000;
@@ -85,20 +79,15 @@
     color: white; text-decoration: none;
     font-size: 14px; padding: 9px 16px;
     display: block; white-space: nowrap;
-    font-family: var(--font-sans);
-    font-weight: bold;
+    font-family: var(--font-sans); font-weight: bold;
   }
   .primary-nav a:hover { background: #660000; color: white; text-decoration: none; }
-  .primary-nav .new-work-btn {
-    margin-left: auto;
-    color: #ffcccc;
-  }
+  .primary-nav .new-work-btn { margin-left: auto; color: #ffcccc; }
 
   /* ── OUTER / INNER WRAPPER ── */
-  /* #outer 全宽，不再限制最大宽度 */
   #outer { width: 100%; }
 
-  /* 默认状态（上传页）：居中 + 限制最大宽度 */
+  /* 上传页：居中限宽 */
   #inner {
     display: flex; gap: 0; align-items: flex-start;
     padding: 0 20px 60px;
@@ -107,7 +96,7 @@
   }
   #main { flex: 1; min-width: 0; padding-top: 16px; }
 
-  /* 阅读模式：#inner 取消居中限宽，变全宽，padding清零 */
+  /* 阅读模式：全宽，padding清零 */
   #inner.reading-mode {
     max-width: 100%;
     margin: 0;
@@ -117,8 +106,7 @@
   /* ── BREADCRUMB ── */
   .breadcrumb {
     font-size: 12px; color: var(--text-muted);
-    padding: 6px 0 10px;
-    margin-bottom: 12px;
+    padding: 6px 0 10px; margin-bottom: 12px;
   }
   .breadcrumb a { color: var(--link); }
 
@@ -127,23 +115,17 @@
     background: var(--bg-inner);
     border: 1px solid var(--border);
   }
-
   .section-header {
-    background: var(--red);
-    color: white;
-    padding: 8px 16px;
-    font-size: 13px; font-weight: bold;
+    background: var(--red); color: white;
+    padding: 8px 16px; font-size: 13px; font-weight: bold;
     letter-spacing: 0.3px;
   }
   .section-body { padding: 20px 16px; }
 
   .drop-zone {
-    border: 2px dashed #bbb;
-    background: #fafaf8;
-    padding: 30px 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
+    border: 2px dashed #bbb; background: #fafaf8;
+    padding: 30px 20px; text-align: center;
+    cursor: pointer; transition: border-color 0.2s, background 0.2s;
     border-radius: 2px;
   }
   .drop-zone:hover, .drop-zone.drag-over {
@@ -177,9 +159,7 @@
     margin: 16px 0 10px;
   }
   .form-section-title:first-child { margin-top: 0; }
-  .form-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-  }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .form-grid .full { grid-column: 1 / -1; }
   .field label {
     display: block; font-size: 11px; font-weight: bold;
@@ -206,14 +186,16 @@
     margin-top: 16px;
     background: var(--red); color: white; border: none;
     padding: 8px 24px; font-size: 13px; border-radius: 2px;
-    cursor: pointer; font-family: var(--font-sans);
-    font-weight: bold;
+    cursor: pointer; font-family: var(--font-sans); font-weight: bold;
   }
   .render-btn:hover { background: var(--red-dark); }
   .render-btn:disabled { background: #aaa; cursor: not-allowed; }
 
-  /* ── WORK PAGE ── */
-  /* 阅读页正文区：居中 + 限制最大宽度，独立于元数据框 */
+  /* ══════════════════════════════════════
+     阅读页
+  ══════════════════════════════════════ */
+
+  /* 阅读页整体容器：居中，最大900px */
   #work-section {
     display: none;
     max-width: 900px;
@@ -221,50 +203,87 @@
     padding: 0 20px;
   }
 
-  /* 顶部操作栏（仿AO3 work navigation actions） */
-  .work-actions {
-    background: var(--bg-inner);
-    border: 1px solid var(--border);
-    margin-bottom: 12px;
-    padding: 0;
+  /* ── 顶部/底部按钮栏（AO3风格，靠右） ── */
+  /* 注意：work-nav-bar 在 #outer 里、#inner 外，所以单独处理宽度 */
+  .work-nav-bar {
+    display: none;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 20px;
+    max-width: 900px;
+    margin: 0 auto;
   }
-  .work-actions h3 {
-    background: var(--red); color: white;
-    font-size: 12px; padding: 5px 12px;
-    letter-spacing: 0.3px;
-  }
-  .work-actions ul {
-    list-style: none; display: flex; flex-wrap: wrap;
-    padding: 0; margin: 0; gap: 0;
-  }
-  .work-actions li { border-right: 1px solid var(--border); }
-  .work-actions li a, .work-actions li button {
-    display: block; padding: 7px 14px;
-    font-size: 12px; color: var(--link);
-    text-decoration: none; background: none; border: none;
-    cursor: pointer; font-family: var(--font-sans);
-    white-space: nowrap;
-  }
-  .work-actions li a:hover, .work-actions li button:hover {
-    background: #eee; text-decoration: underline;
+  /* 底部按钮栏额外上边距 */
+  #work-nav-bar-bottom {
+    margin-top: 16px;
   }
 
-  /* 作品元数据框：全宽显示，左右各留 40px 间距 */
+  /* 按钮统一样式（模拟AO3的灰色渐变按钮） */
+  .wnb-btn {
+    background: linear-gradient(to bottom, #ffffff, #d8d8d8);
+    border: 1px solid #b0b0b0;
+    color: var(--text);
+    font-size: 13px;
+    font-family: var(--font-sans);
+    padding: 5px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    position: relative; /* 给下拉菜单做定位锚点 */
+  }
+  .wnb-btn:hover {
+    background: linear-gradient(to bottom, #f0f0f0, #c8c8c8);
+  }
+
+  /* ── Chapter Index 下拉菜单 ── */
+  .chapter-index-wrap {
+    position: relative;
+    display: inline-block;
+  }
+  .chapter-index-dropdown {
+    display: none;
+    position: absolute;
+    right: 0; top: 100%;
+    margin-top: 4px;
+    background: white;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 100;
+    min-width: 220px;
+    max-height: 320px;
+    overflow-y: auto;
+    border-radius: 2px;
+  }
+  .chapter-index-dropdown.open { display: block; }
+  .chapter-index-dropdown a {
+    display: block;
+    padding: 7px 14px;
+    font-size: 13px;
+    color: var(--link);
+    border-bottom: 1px solid var(--border-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .chapter-index-dropdown a:last-child { border-bottom: none; }
+  .chapter-index-dropdown a:hover { background: var(--bg-inner); text-decoration: none; }
+  .chapter-index-dropdown a.current {
+    background: #fff0f0;
+    color: var(--red);
+    font-weight: bold;
+  }
+
+  /* ── 元数据框 ── */
   .work-meta-wrap {
-    background: var(--bg-white, #ffffff);
+    background: white;
     border: 1px solid var(--border);
     border-radius: 3px;
     padding: 16px 20px;
-    margin: 0 40px 0 40px;
-    box-shadow: 1px 2px 6px rgba(0,0,0,0.10);
+    max-width: 900px;
+    margin: 0 auto 0;
+    box-shadow: 1px 2px 6px rgba(0,0,0,0.08);
   }
-  .work-title-block { margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
-  .work-title {
-    font-family: var(--font-serif); font-size: 20px;
-    color: var(--text); line-height: 1.3; margin-bottom: 4px;
-  }
-  .work-byline { font-size: 13px; color: var(--text-muted); }
-  .work-byline a { color: var(--link-red); }
 
   dl.work-meta {
     display: grid;
@@ -275,9 +294,7 @@
   }
   dl.work-meta dt {
     font-weight: bold; color: var(--text-muted);
-    white-space: nowrap;
-    padding-right: 4px;
-    text-align: left;
+    white-space: nowrap; padding-right: 4px; text-align: left;
   }
   dl.work-meta dd { color: var(--text); }
   dl.work-meta dd ul { list-style: none; display: flex; flex-wrap: wrap; gap: 4px; }
@@ -298,90 +315,70 @@
     color: var(--tag-free-text);
   }
   .tag-link.freeform:hover { background: #d0e8f0; }
-  .tag-link.rating { background: #e8f0e8; border-color: #90b890; color: #2a6a2a; }
-  .tag-link.warning { background: #f5ebe8; border-color: #d89080; color: #7a3020; }
   .tag-link.category { background: #f0e8f5; border-color: #b090c8; color: #5a2a7a; }
 
-  /* Stats 横排 */
-  dl.work-stats {
-    display: flex; flex-wrap: wrap; gap: 0;
-    font-size: 12px; margin-top: 10px;
-    border-top: 1px solid var(--border); padding-top: 8px;
+  /* ── 大标题 + 作者（元数据框下方，居中） ── */
+  .work-title-block {
+    text-align: center;
+    padding: 28px 20px 16px;
+    max-width: 900px;
+    margin: 0 auto;
   }
-  dl.work-stats dt { font-weight: bold; color: var(--text-muted); margin-right: 3px; }
-  dl.work-stats dd {
-    color: var(--text); margin-right: 14px;
-    display: flex; align-items: center; gap: 3px;
+  .work-title {
+    font-family: var(--font-serif);
+    font-size: 26px;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 8px;
   }
-  dl.work-stats dd::after { content: ''; }
+  .work-byline {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  .work-byline a { color: var(--link-red); }
 
-  /* Summary / Notes 模块 */
+  /* ── Summary / Notes 模块 ── */
+  /* 参考截图：左边一条竖线，标题加粗，内容缩进 */
   .preface-module {
+    max-width: 900px;
+    margin: 0 auto 12px;
+    padding: 0 20px;
+  }
+  .preface-module-inner {
+    border-left: 3px solid #cccccc;
+    padding: 10px 16px;
     background: var(--bg-inner);
-    border: 1px solid var(--border);
-    border-left: 4px solid #cccccc;
-    padding: 12px 16px;
-    margin-bottom: 10px;
+  }
+  .preface-module.summary .preface-module-inner {
+    border-left-color: var(--red);
   }
   .preface-module h3 {
-    font-size: 12px; font-weight: bold; color: var(--text-muted);
-    text-transform: uppercase; letter-spacing: 0.5px;
-    margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px;
+    font-size: 13px; font-weight: bold;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 4px;
   }
-  .preface-module.summary { border-left-color: var(--red); }
-  .preface-module blockquote {
-    font-family: var(--font-serif); font-size: 14px;
-    color: #444; line-height: 1.75;
-    padding-left: 12px; border-left: 2px solid #ddd;
+  .preface-module p, .preface-module blockquote {
+    font-family: var(--font-serif);
+    font-size: 14px; color: #444;
+    line-height: 1.75;
+    white-space: pre-wrap;
   }
 
-  /* 阅读设置 */
-  .settings-bar {
-    background: #f0f0eb; border: 1px solid var(--border); border-bottom: none;
-    padding: 7px 14px; display: flex; align-items: center; gap: 16px;
-    font-size: 12px; color: var(--text-muted); flex-wrap: wrap;
-  }
-  .settings-bar label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
-  .settings-bar select {
-    border: 1px solid #ccc; background: white; font-size: 12px;
-    padding: 2px 5px; border-radius: 2px; cursor: pointer;
-  }
-  .settings-bar input[type="range"] { width: 72px; cursor: pointer; }
-
-  /* 章节导航 */
-  .chapter-nav {
-    background: var(--bg-inner); border: 1px solid var(--border); border-bottom: none;
-    padding: 8px 14px;
-    display: flex; justify-content: space-between; align-items: center; gap: 8px;
-  }
-  .chapter-nav select {
-    border: 1px solid #ccc; background: var(--bg-page); color: var(--text);
-    font-size: 12px; padding: 3px 6px; border-radius: 2px; cursor: pointer;
-    max-width: 260px; font-family: var(--font-sans);
-  }
-  .nav-btn {
-    color: var(--link); font-size: 12px; padding: 4px 12px;
-    border: 1px solid var(--border); border-radius: 2px;
-    background: var(--bg-page); cursor: pointer; font-family: var(--font-sans);
-    white-space: nowrap; text-decoration: none; display: inline-block;
-  }
-  .nav-btn:hover { background: var(--red); color: white; border-color: var(--red); text-decoration: none; }
-  .nav-btn:disabled { color: #aaa; background: var(--bg-inner); border-color: #ddd; cursor: default; }
-
-  /* 正文区 */
+  /* ── 正文区（无边框、无卡片） ── */
   .chapter-content {
-    background: white; border: 1px solid var(--border);
-    padding: 32px 44px;
-  }
-  .work-text-heading {
-    font-size: 12px; font-weight: bold; color: var(--text-muted);
-    text-transform: uppercase; letter-spacing: 0.5px;
-    margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 6px;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 16px 20px 32px;
   }
   .chapter-heading {
-    font-family: var(--font-serif); font-size: 16px; color: var(--text);
-    margin-bottom: 18px; padding-bottom: 10px;
+    font-family: var(--font-serif);
+    font-size: 18px; color: var(--text);
+    margin-bottom: 18px;
+    padding-bottom: 10px;
     border-bottom: 1px solid var(--border-light);
+    text-align: center;
   }
   .chapter-body { font-family: var(--font-serif); }
   .chapter-body p {
@@ -393,84 +390,95 @@
     margin: 1.5em 0 0.5em; font-family: var(--font-serif);
   }
 
-  .chapter-nav-bottom {
-    background: var(--bg-inner); border: 1px solid var(--border); border-top: none;
-    padding: 8px 14px;
-    display: flex; justify-content: space-between; align-items: center;
-    font-size: 12px; color: var(--text-hint);
+  /* ── Comments 区 ── */
+  .comments-section {
+    max-width: 900px;
+    margin: 0 auto 20px;
+    padding: 0 20px;
   }
-
-  /* Kudos */
-  .kudos-section {
-    background: var(--bg-inner); border: 1px solid var(--border);
-    border-top: 3px solid var(--red);
-    margin-top: 18px; padding: 16px;
-    text-align: center;
+  .comments-box {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
   }
-  .kudos-section p { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
-  .kudos-section .kudos-count {
-    font-size: 12px; color: var(--text-hint); margin-top: 8px;
+  .comments-box-header {
+    background: var(--red);
+    color: white;
+    padding: 7px 14px;
+    font-size: 13px; font-weight: bold;
+    letter-spacing: 0.3px;
   }
-  .kudos-btn {
-    background: var(--red); color: white; border: none;
-    padding: 6px 18px; font-size: 13px; border-radius: 2px;
-    cursor: pointer; font-family: var(--font-sans);
+  .comments-box-body {
+    background: var(--bg-inner);
+    padding: 16px;
   }
-  .kudos-btn:hover { background: var(--red-dark); }
-
-  /* AO3风格操作按钮栏：元数据框下方，靠右排列 */
-  .work-nav-bar {
-    display: none;                        /* 默认隐藏，进入阅读页才显示 */
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: 6px;
-    padding: 10px 40px;
-    background: var(--bg-page);
+  .comments-placeholder {
+    font-size: 13px; color: var(--text-muted);
+    text-align: center; padding: 12px 0;
   }
-  .work-nav-bar .wnb-btn {
-    background: linear-gradient(to top, #d8d8d8, #ffffff);
+  /* 留言表单 */
+  .comment-form { margin-top: 16px; }
+  .comment-form p {
+    font-size: 12px; color: var(--text-muted); margin-bottom: 10px;
+  }
+  .comment-form label {
+    display: block; font-size: 11px; font-weight: bold;
+    color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: 0.4px; margin-bottom: 3px; margin-top: 10px;
+  }
+  .comment-form input,
+  .comment-form textarea {
+    width: 100%; border: 1px solid #ccc; background: white;
+    padding: 6px 8px; font-size: 13px;
+    font-family: var(--font-sans); color: var(--text);
+    border-radius: 2px; outline: none;
+  }
+  .comment-form input:focus, .comment-form textarea:focus {
+    border-color: var(--red); box-shadow: 0 0 0 2px rgba(153,0,0,0.08);
+  }
+  .comment-form textarea { resize: vertical; min-height: 80px; }
+  .comment-form .char-count {
+    font-size: 11px; color: var(--text-hint);
+    text-align: right; margin-top: 3px;
+  }
+  .comment-submit-btn {
+    margin-top: 12px;
+    background: linear-gradient(to bottom, #ffffff, #d8d8d8);
     border: 1px solid #b0b0b0;
-    color: var(--text);
-    font-size: 13px;
+    color: var(--text); font-size: 13px;
     font-family: var(--font-sans);
-    padding: 6px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: background 0.15s, box-shadow 0.15s;
+    padding: 5px 18px; border-radius: 4px;
+    cursor: pointer; float: right;
   }
-  .work-nav-bar .wnb-btn:hover {
-    background: linear-gradient(to top, #c8c8c8, #f0f0f0);
+  .comment-submit-btn:hover {
+    background: linear-gradient(to bottom, #f0f0f0, #c8c8c8);
   }
-  .work-nav-bar .wnb-btn:hover {
-    background: #e8e8e0;
+  .comment-form-footer { overflow: hidden; }
+
+  /* 已提交留言提示 */
+  .comment-submitted {
+    display: none;
+    font-size: 13px; color: var(--text-muted);
+    text-align: center; padding: 12px 0;
+    font-style: italic;
   }
 
-  /* Back btn */
-  .back-link {
-    display: inline-block; font-size: 12px; color: var(--link);
-    padding: 5px 10px; border: 1px solid var(--border);
-    background: var(--bg-inner); border-radius: 2px;
-    margin-bottom: 12px; text-decoration: none;
-  }
-  .back-link:hover { background: #e8e8e0; text-decoration: none; }
-
-  /* FOOTER */
+  /* ── FOOTER ── */
   #footer {
     background: #333; color: #999; font-size: 11px;
     text-align: center; padding: 14px; margin-top: 30px;
   }
   #footer a { color: #bbb; }
 
-  /* Responsive */
+  /* ── Responsive ── */
   @media (max-width: 620px) {
     #inner { padding: 0 12px 40px; }
-    .chapter-content { padding: 18px 16px; }
+    .chapter-content { padding: 16px 12px 24px; }
     .form-grid { grid-template-columns: 1fr; }
     dl.work-meta { grid-template-columns: 1fr; }
     dl.work-meta dt { text-align: left; }
-    .chapter-nav { flex-direction: column; gap: 6px; text-align: center; }
-    .header-search { display: none; }
+    .work-nav-bar { padding: 8px 12px; }
+    .work-meta-wrap { margin: 0 12px; }
   }
 </style>
 </head>
@@ -499,24 +507,26 @@
     <li><a href="#">Browse</a></li>
     <li><a href="#">Search</a></li>
     <li><a href="#">About</a></li>
-    <li><a href="#" class="new-work-btn" id="new-btn" onclick="showUpload(); return false;">+ 上传新文章</a></li>
+    <li><a href="#" class="new-work-btn" onclick="showUpload(); return false;">+ 上传新文章</a></li>
   </ul>
 </nav>
 
 <div id="outer">
 
-  <!-- AO3风格操作按钮栏：导航栏和元数据框之间，靠右排列 -->
-  <div class="work-nav-bar" id="work-nav-bar">
-    <button class="wnb-btn" id="wnb-entire">Entire Work</button>
-    <button class="wnb-btn" id="wnb-prev">← Previous Chapter</button>
-    <button class="wnb-btn" id="wnb-next">Next Chapter →</button>
-    <button class="wnb-btn" id="wnb-index">Chapter Index ↓</button>
-    <button class="wnb-btn" id="wnb-comments">Comments</button>
+  <!-- ── 顶部按钮栏（阅读页才显示） ── -->
+  <div class="work-nav-bar" id="work-nav-bar-top">
+    <button class="wnb-btn" id="wnb-entire" onclick="scrollToTop()">Entire Work</button>
+    <!-- Chapter Index 带下拉菜单 -->
+    <div class="chapter-index-wrap" id="chapter-index-wrap" style="display:none">
+      <button class="wnb-btn" id="wnb-index" onclick="toggleChapterIndex(event)">Chapter Index ▾</button>
+      <div class="chapter-index-dropdown" id="chapter-index-dropdown"></div>
+    </div>
+    <button class="wnb-btn" id="wnb-comments-top" onclick="scrollToComments()">Comments</button>
     <button class="wnb-btn" id="wnb-share">Share</button>
     <button class="wnb-btn" id="wnb-download">Download ↓</button>
   </div>
 
-  <!-- 作品元数据框：独立于#inner之外，宽度跟着#outer走，用padding贴边 -->
+  <!-- ── 元数据框（阅读页才显示） ── -->
   <div class="work-meta-wrap" id="work-meta-wrap" style="display:none">
     <dl class="work-meta" id="disp-meta"></dl>
   </div>
@@ -529,7 +539,9 @@
         <a href="#" onclick="showUpload(); return false;">Home</a> &rsaquo; 上传文章
       </div>
 
-      <!-- ── 上传页 ── -->
+      <!-- ══════════════════════════════════════
+           上传页
+      ══════════════════════════════════════ -->
       <div id="upload-section">
         <div class="section-header">上传文章</div>
         <div class="section-body">
@@ -634,69 +646,75 @@
       </div><!-- /upload-section -->
 
 
-      <!-- ── 阅读页 ── -->
+      <!-- ══════════════════════════════════════
+           阅读页
+      ══════════════════════════════════════ -->
       <div id="work-section">
+
+        <!-- 大标题 + 作者名（居中，在元数据框下方） -->
+        <div class="work-title-block">
+          <h1 class="work-title" id="disp-title"></h1>
+          <div class="work-byline">by <a href="#" id="disp-author"></a></div>
+        </div>
 
         <!-- Summary 模块 -->
         <div class="preface-module summary" id="disp-summary-box" style="display:none">
-          <h3>Summary:</h3>
-          <blockquote id="disp-summary"></blockquote>
+          <div class="preface-module-inner">
+            <h3>Summary:</h3>
+            <p id="disp-summary"></p>
+          </div>
         </div>
 
         <!-- Notes 模块 -->
         <div class="preface-module" id="disp-notes-box" style="display:none">
-          <h3>Notes:</h3>
-          <blockquote id="disp-notes"></blockquote>
+          <div class="preface-module-inner">
+            <h3>Notes:</h3>
+            <p id="disp-notes"></p>
+          </div>
         </div>
 
-        <!-- 阅读设置栏 -->
-        <div class="settings-bar">
-          <label>字号
-            <input type="range" id="font-size-range" min="13" max="22" value="16"
-              oninput="document.querySelector('.chapter-body').style.fontSize=this.value+'px'">
-          </label>
-          <label>行距
-            <select onchange="document.querySelector('.chapter-body').style.lineHeight=this.value">
-              <option value="1.6">紧凑</option>
-              <option value="1.85" selected>舒适</option>
-              <option value="2.2">宽松</option>
-            </select>
-          </label>
-          <label>字体
-            <select onchange="document.querySelector('.chapter-body').style.fontFamily=this.value">
-              <option value="Georgia,'Times New Roman',serif">宋体风格</option>
-              <option value="'PingFang SC','Microsoft YaHei',sans-serif">黑体风格</option>
-              <option value="'Kaiti SC','KaiTi',Georgia,serif">楷体风格</option>
-            </select>
-          </label>
-        </div>
-
-        <!-- 章节导航（上） -->
-        <div class="chapter-nav" id="chapter-nav-top">
-          <button class="nav-btn" id="prev-btn-top" onclick="goChapter(-1)">‹ Previous Chapter</button>
-          <select id="chapter-select" onchange="goToChapter(parseInt(this.value))"></select>
-          <button class="nav-btn" id="next-btn-top" onclick="goChapter(1)">Next Chapter ›</button>
-        </div>
-
-        <!-- 正文 -->
+        <!-- 正文（无边框无卡片） -->
         <div class="chapter-content">
-          <div class="work-text-heading">Work Text:</div>
-          <h2 class="chapter-heading" id="chapter-heading"></h2>
+          <h2 class="chapter-heading" id="chapter-heading" style="display:none"></h2>
           <div class="chapter-body" id="chapter-body"></div>
         </div>
 
-        <!-- 章节导航（下） -->
-        <div class="chapter-nav-bottom">
-          <button class="nav-btn" id="prev-btn-bottom" onclick="goChapter(-1)">‹ Previous Chapter</button>
-          <span id="chapter-progress"></span>
-          <button class="nav-btn" id="next-btn-bottom" onclick="goChapter(1)">Next Chapter ›</button>
+        <!-- 底部按钮栏（↑ Top / ← Prev / Kudos / Next → / Comments） -->
+        <div class="work-nav-bar" id="work-nav-bar-bottom" style="display:none">
+          <button class="wnb-btn" onclick="scrollToTop()">↑ Top</button>
+          <button class="wnb-btn" id="wnb-prev" style="display:none" onclick="goChapter(-1)">← Previous Chapter</button>
+          <button class="wnb-btn" id="wnb-kudos" onclick="doKudos()">♡ Kudos</button>
+          <button class="wnb-btn" id="wnb-next" style="display:none" onclick="goChapter(1)">Next Chapter →</button>
+          <button class="wnb-btn" onclick="scrollToComments()">Comments</button>
         </div>
 
-        <!-- Kudos区 -->
-        <div class="kudos-section">
-          <p>喜欢这篇作品？留下一个 Kudos 吧！</p>
-          <button class="kudos-btn" id="kudos-btn" onclick="doKudos()">♡ Kudos</button>
-          <div class="kudos-count" id="kudos-count"></div>
+        <!-- Comments 区 -->
+        <div class="comments-section" id="comments-section">
+          <div class="comments-box">
+            <div class="comments-box-header">Comments</div>
+            <div class="comments-box-body">
+              <div class="comments-placeholder">暂无评论</div>
+              <!-- 留言表单 -->
+              <div class="comment-form" id="comment-form">
+                <p>All fields are required. Your email address will not be published.</p>
+                <label>Guest name</label>
+                <input type="text" id="comment-name" placeholder="">
+                <label>Guest email</label>
+                <input type="email" id="comment-email" placeholder="">
+                <label>Comment</label>
+                <textarea id="comment-text" maxlength="10000"
+                  oninput="updateCharCount()"></textarea>
+                <div class="char-count"><span id="char-count">10000</span> characters left</div>
+                <div class="comment-form-footer">
+                  <button class="comment-submit-btn" onclick="submitComment()">Comment</button>
+                </div>
+              </div>
+              <!-- 提交成功提示 -->
+              <div class="comment-submitted" id="comment-submitted">
+                感谢你的留言！（本地演示，留言不会真正保存）
+              </div>
+            </div>
+          </div>
         </div>
 
       </div><!-- /work-section -->
@@ -902,7 +920,6 @@
 
   // ── 渲染 ──
   function renderWork() {
-    // 读取所有表单值，均为选填
     const title        = document.getElementById('meta-title').value.trim() || '未命名作品';
     const author       = document.getElementById('meta-author').value.trim() || 'Anonymous';
     const rating       = document.getElementById('meta-rating').value;
@@ -917,7 +934,6 @@
     const language     = document.getElementById('meta-language').value.trim();
     const published    = document.getElementById('meta-published').value.trim();
 
-    // 拆分标签的通用函数
     const splitTags = str => str ? str.split(/[,，、]/).map(t => t.trim()).filter(Boolean) : [];
 
     // 处理章节
@@ -949,25 +965,28 @@
       });
     }
 
-    // 统计数据
+    // 统计字数
     const fullText = epubChapters ? epubChapters.map(c => c.text).join('') : rawText;
     const totalChars = fullText.replace(/\s/g, '').length;
 
-    // 填充标题 / 作者
-    // 标题和作者不再显示在元数据框里，只更新浏览器标签页标题
+    // 更新浏览器标题
     document.title = title + ' - ' + author + ' [Archive of Our Own]';
 
-    // 构建 dl.work-meta
+    // ── 大标题 + 作者 ──
+    document.getElementById('disp-title').textContent = title;
+    const authorEl = document.getElementById('disp-author');
+    authorEl.textContent = author;
+    authorEl.href = '#';
+
+    // ── 元数据框 ──
     const metaDl = document.getElementById('disp-meta');
     metaDl.innerHTML = '';
 
-    // 辅助：添加一行 dt+dd，没有内容时显示短横线占位
     function addMetaRow(labelText, tagsArr, cssClass) {
       const dt = document.createElement('dt');
       dt.textContent = labelText + ':';
       const dd = document.createElement('dd');
       if (!tagsArr || tagsArr.length === 0) {
-        // 空值用灰色短横线占位
         dd.style.color = 'var(--text-hint)';
         dd.textContent = '—';
       } else {
@@ -977,16 +996,13 @@
           const a = document.createElement('a');
           a.className = 'tag-link' + (cssClass ? ' ' + cssClass : '');
           a.href = '#'; a.textContent = t;
-          li.appendChild(a);
-          ul.appendChild(li);
+          li.appendChild(a); ul.appendChild(li);
         });
         dd.appendChild(ul);
       }
-      metaDl.appendChild(dt);
-      metaDl.appendChild(dd);
+      metaDl.appendChild(dt); metaDl.appendChild(dd);
     }
 
-    // 辅助：添加纯文本行（不用标签气泡），空时显示短横线
     function addTextRow(labelText, value, bold) {
       const dt = document.createElement('dt');
       dt.textContent = labelText + ':';
@@ -998,8 +1014,7 @@
         dd.style.color = 'var(--text-hint)';
         dd.textContent = '—';
       }
-      metaDl.appendChild(dt);
-      metaDl.appendChild(dd);
+      metaDl.appendChild(dt); metaDl.appendChild(dd);
     }
 
     addTextRow('Rating',          rating ? ratingLabel(rating) : '', false);
@@ -1011,13 +1026,11 @@
     addMetaRow('Additional Tags', splitTags(tagsRaw), 'freeform');
     addTextRow('Language',        language, false);
 
-    // Stats：以两列格式追加到 work-meta 里，和 Rating 等字段保持一致
-    // Stats：作为单独一行，右侧横排显示各项数据
+    // Stats 行
     (function() {
       const dt = document.createElement('dt');
       dt.textContent = 'Stats:';
       const dd = document.createElement('dd');
-      // 构建横排内容
       const items = [];
       if (published) items.push({ label: 'Published', value: escapeHtml(published) });
       items.push({ label: 'Words',     value: totalChars.toLocaleString('zh-CN') });
@@ -1026,16 +1039,14 @@
       items.push({ label: 'Kudos',     value: '0' });
       items.push({ label: 'Bookmarks', value: '0' });
       items.push({ label: 'Hits',      value: '0' });
-      dd.style.flexWrap = 'wrap';
-      dd.style.display = 'flex';
+      dd.style.display = 'flex'; dd.style.flexWrap = 'wrap';
       dd.innerHTML = items.map(it =>
         `<span style="margin-right:14px;margin-bottom:2px;white-space:nowrap"><strong>${it.label}:</strong> ${it.value}</span>`
       ).join('');
-      metaDl.appendChild(dt);
-      metaDl.appendChild(dd);
+      metaDl.appendChild(dt); metaDl.appendChild(dd);
     })();
 
-    // Summary / Notes
+    // ── Summary / Notes ──
     if (summary) {
       document.getElementById('disp-summary').textContent = summary;
       document.getElementById('disp-summary-box').style.display = 'block';
@@ -1049,22 +1060,35 @@
       document.getElementById('disp-notes-box').style.display = 'none';
     }
 
-    // 章节下拉
-    const sel = document.getElementById('chapter-select');
-    sel.innerHTML = '';
+    // ── Chapter Index 下拉填充 ──
+    const dropdown = document.getElementById('chapter-index-dropdown');
+    dropdown.innerHTML = '';
     chapters.forEach((ch, i) => {
-      const opt = document.createElement('option');
-      opt.value = i;
-      opt.textContent = ch.title || `Chapter ${i + 1}`;
-      sel.appendChild(opt);
+      const a = document.createElement('a');
+      a.href = '#';
+      a.textContent = ch.title || `Chapter ${i + 1}`;
+      a.dataset.idx = i;
+      a.onclick = e => {
+        e.preventDefault();
+        goToChapter(i);
+        closeChapterIndex();
+      };
+      dropdown.appendChild(a);
     });
 
-    // 重置kudos
+    // 重置 kudos
     kudosGiven = false;
-    document.getElementById('kudos-btn').textContent = '♡ Kudos';
-    document.getElementById('kudos-btn').style.background = '';
-    document.getElementById('kudos-btn').disabled = false;
-    document.getElementById('kudos-count').textContent = '';
+    document.getElementById('wnb-kudos').textContent = '♡ Kudos';
+    document.getElementById('wnb-kudos').style.background = '';
+    document.getElementById('wnb-kudos').disabled = false;
+
+    // 重置留言表单
+    document.getElementById('comment-name').value = '';
+    document.getElementById('comment-email').value = '';
+    document.getElementById('comment-text').value = '';
+    document.getElementById('char-count').textContent = '10000';
+    document.getElementById('comment-form').style.display = 'block';
+    document.getElementById('comment-submitted').style.display = 'none';
 
     currentChapter = 0;
     displayChapter(0);
@@ -1076,12 +1100,7 @@
   }
 
   function ratingLabel(r) {
-    return {
-      G: 'General Audiences',
-      T: 'Teen And Up Audiences',
-      M: 'Mature',
-      E: 'Explicit'
-    }[r] || r;
+    return { G: 'General Audiences', T: 'Teen And Up Audiences', M: 'Mature', E: 'Explicit' }[r] || r;
   }
 
   function displayChapter(idx) {
@@ -1089,33 +1108,48 @@
     const ch = chapters[idx];
     const total = chapters.length;
 
-    // 单章时隐藏导航里的章节标题行（标题直接为空）
-    document.getElementById('chapter-heading').textContent = ch.title || '';
-    document.getElementById('chapter-heading').style.display = ch.title ? 'block' : 'none';
-    document.getElementById('chapter-body').innerHTML = textToHtml(ch.body);
-    document.getElementById('chapter-progress').textContent =
-      total > 1 ? `Chapter ${idx + 1} of ${total}` : '';
+    // 章节标题（单章或无标题时隐藏）
+    const headingEl = document.getElementById('chapter-heading');
+    if (ch.title) {
+      headingEl.textContent = ch.title;
+      headingEl.style.display = 'block';
+    } else {
+      headingEl.style.display = 'none';
+    }
 
-    document.getElementById('chapter-select').value = idx;
+    document.getElementById('chapter-body').innerHTML = textToHtml(ch.body);
+
+    // 更新 Chapter Index 下拉高亮当前章节
+    document.querySelectorAll('#chapter-index-dropdown a').forEach((a, i) => {
+      a.classList.toggle('current', i === idx);
+    });
 
     const isFirst = idx === 0, isLast = idx === total - 1;
-    ['prev-btn-top','prev-btn-bottom'].forEach(id => document.getElementById(id).disabled = isFirst);
-    ['next-btn-top','next-btn-bottom'].forEach(id => document.getElementById(id).disabled = isLast);
-
-    // 单章时隐藏章节导航
     const showNav = total > 1;
-    document.getElementById('chapter-nav-top').style.display = showNav ? '' : 'none';
-    document.querySelector('.chapter-nav-bottom').style.display = showNav ? '' : 'none';
 
-    // ── 按钮栏显隐控制 ──
-    // Previous/Next 按钮：单章时不显示；多章时按位置决定
+    // 顶部按钮栏：Chapter Index 按钮显隐
+    document.getElementById('chapter-index-wrap').style.display = showNav ? 'inline-block' : 'none';
+
+    // 底部按钮栏：Prev / Next 显隐
     document.getElementById('wnb-prev').style.display = (!isFirst && showNav) ? '' : 'none';
     document.getElementById('wnb-next').style.display = (!isLast  && showNav) ? '' : 'none';
-    // Chapter Index 按钮：单章时也不需要
-    document.getElementById('wnb-index').style.display = showNav ? '' : 'none';
 
-    document.getElementById('chapter-heading').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // 滚动到章节标题
+    document.getElementById('chapter-heading').scrollIntoView
+      ? document.getElementById('chapter-heading').scrollIntoView({ behavior: 'smooth', block: 'start' })
+      : window.scrollTo(0, 0);
   }
+
+  // ── Chapter Index 下拉开关 ──
+  function toggleChapterIndex(e) {
+    e.stopPropagation();
+    document.getElementById('chapter-index-dropdown').classList.toggle('open');
+  }
+  function closeChapterIndex() {
+    document.getElementById('chapter-index-dropdown').classList.remove('open');
+  }
+  // 点击页面其他地方关闭下拉
+  document.addEventListener('click', () => closeChapterIndex());
 
   function textToHtml(text) {
     const lines = text.split('\n');
@@ -1168,35 +1202,67 @@
     if (idx >= 0 && idx < chapters.length) displayChapter(idx);
   }
 
+  // Kudos
   function doKudos() {
     if (kudosGiven) return;
     kudosGiven = true;
-    const btn = document.getElementById('kudos-btn');
+    const btn = document.getElementById('wnb-kudos');
     btn.textContent = '♥ Kudos Given!';
-    btn.style.background = '#555';
+    btn.style.background = 'linear-gradient(to bottom, #888, #555)';
+    btn.style.color = 'white';
     btn.disabled = true;
-    document.getElementById('kudos-count').textContent = '感谢你的支持！';
+  }
+
+  // 滚动到顶部
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // 滚动到 Comments 区
+  function scrollToComments() {
+    document.getElementById('comments-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // 留言字数统计
+  function updateCharCount() {
+    const remaining = 10000 - document.getElementById('comment-text').value.length;
+    document.getElementById('char-count').textContent = remaining;
+  }
+
+  // 提交留言（本地演示，不真正发送）
+  function submitComment() {
+    const name = document.getElementById('comment-name').value.trim();
+    const email = document.getElementById('comment-email').value.trim();
+    const text = document.getElementById('comment-text').value.trim();
+    if (!name || !email || !text) {
+      alert('请填写所有字段');
+      return;
+    }
+    document.getElementById('comment-form').style.display = 'none';
+    document.getElementById('comment-submitted').style.display = 'block';
   }
 
   // ── 视图切换 ──
   function showWork() {
     document.getElementById('upload-section').style.display = 'none';
-    document.getElementById('work-section').style.display  = 'block';
+    document.getElementById('work-section').style.display   = 'block';
     document.getElementById('work-meta-wrap').style.display = 'block';
-    document.getElementById('work-nav-bar').style.display = 'flex';   // 进入阅读页才显示按钮栏
+    document.getElementById('work-nav-bar-top').style.display    = 'flex';
+    document.getElementById('work-nav-bar-bottom').style.display = 'flex';
     document.getElementById('breadcrumb').innerHTML = '';
-    document.getElementById('inner').classList.add('reading-mode');   // 切换到阅读布局（全宽）
+    document.getElementById('inner').classList.add('reading-mode');
     window.scrollTo(0, 0);
   }
 
   function showUpload() {
     document.getElementById('upload-section').style.display = 'block';
-    document.getElementById('work-section').style.display  = 'none';
+    document.getElementById('work-section').style.display   = 'none';
     document.getElementById('work-meta-wrap').style.display = 'none';
-    document.getElementById('work-nav-bar').style.display = 'none';   // 回上传页时隐藏按钮栏
+    document.getElementById('work-nav-bar-top').style.display    = 'none';
+    document.getElementById('work-nav-bar-bottom').style.display = 'none';
     document.getElementById('breadcrumb').innerHTML =
       `<a href="#" onclick="showUpload(); return false;">Home</a> &rsaquo; 上传文章`;
-    document.getElementById('inner').classList.remove('reading-mode'); // 恢复上传页布局（居中限宽）
+    document.getElementById('inner').classList.remove('reading-mode');
     document.title = '阅读器 · Archive of Our Own';
     window.scrollTo(0, 0);
   }
