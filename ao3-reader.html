@@ -277,7 +277,7 @@
     font-weight: bold; color: var(--text-muted);
     white-space: nowrap;
     padding-right: 4px;
-    text-align: right;
+    text-align: left;
   }
   dl.work-meta dd { color: var(--text); }
   dl.work-meta dd ul { list-style: none; display: flex; flex-wrap: wrap; gap: 4px; }
@@ -518,12 +518,7 @@
 
   <!-- 作品元数据框：独立于#inner之外，宽度跟着#outer走，用padding贴边 -->
   <div class="work-meta-wrap" id="work-meta-wrap" style="display:none">
-    <div class="work-title-block">
-      <div class="work-title" id="disp-title"></div>
-      <div class="work-byline">by <a href="#" id="disp-author-link"><span id="disp-author"></span></a></div>
-    </div>
     <dl class="work-meta" id="disp-meta"></dl>
-    <dl class="work-stats" id="disp-stats"></dl>
   </div>
 
   <div id="inner">
@@ -611,6 +606,14 @@
               <div class="field">
                 <label>Additional Tags</label>
                 <input type="text" id="meta-tags" placeholder="例：慢热, HE, 古风">
+              </div>
+              <div class="field">
+                <label>Language <span class="optional">（选填）</span></label>
+                <input type="text" id="meta-language" placeholder="例：中文-普通话 國語">
+              </div>
+              <div class="field">
+                <label>Published <span class="optional">（选填，格式：YYYY-MM-DD）</span></label>
+                <input type="text" id="meta-published" placeholder="例：2025-06-04">
               </div>
             </div>
 
@@ -911,6 +914,8 @@
     const relRaw       = document.getElementById('meta-relationship').value.trim();
     const charRaw      = document.getElementById('meta-character').value.trim();
     const tagsRaw      = document.getElementById('meta-tags').value.trim();
+    const language     = document.getElementById('meta-language').value.trim();
+    const published    = document.getElementById('meta-published').value.trim();
 
     // 拆分标签的通用函数
     const splitTags = str => str ? str.split(/[,，、]/).map(t => t.trim()).filter(Boolean) : [];
@@ -949,49 +954,86 @@
     const totalChars = fullText.replace(/\s/g, '').length;
 
     // 填充标题 / 作者
-    document.getElementById('disp-title').textContent = title;
-    document.getElementById('disp-author').textContent = author;
+    // 标题和作者不再显示在元数据框里，只更新浏览器标签页标题
     document.title = title + ' - ' + author + ' [Archive of Our Own]';
 
     // 构建 dl.work-meta
     const metaDl = document.getElementById('disp-meta');
     metaDl.innerHTML = '';
 
-    // 辅助：添加一行 dt+dd
+    // 辅助：添加一行 dt+dd，没有内容时显示短横线占位
     function addMetaRow(labelText, tagsArr, cssClass) {
-      if (!tagsArr || tagsArr.length === 0) return;
       const dt = document.createElement('dt');
       dt.textContent = labelText + ':';
       const dd = document.createElement('dd');
-      const ul = document.createElement('ul');
-      tagsArr.forEach(t => {
-        const li = document.createElement('li');
-        const a = document.createElement('a');
-        a.className = 'tag-link' + (cssClass ? ' ' + cssClass : '');
-        a.href = '#'; a.textContent = t;
-        li.appendChild(a);
-        ul.appendChild(li);
-      });
-      dd.appendChild(ul);
+      if (!tagsArr || tagsArr.length === 0) {
+        // 空值用灰色短横线占位
+        dd.style.color = 'var(--text-hint)';
+        dd.textContent = '—';
+      } else {
+        const ul = document.createElement('ul');
+        tagsArr.forEach(t => {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.className = 'tag-link' + (cssClass ? ' ' + cssClass : '');
+          a.href = '#'; a.textContent = t;
+          li.appendChild(a);
+          ul.appendChild(li);
+        });
+        dd.appendChild(ul);
+      }
       metaDl.appendChild(dt);
       metaDl.appendChild(dd);
     }
 
-    if (rating) {
-      addMetaRow('Rating', [ratingLabel(rating)], 'rating');
+    // 辅助：添加纯文本行（不用标签气泡），空时显示短横线
+    function addTextRow(labelText, value, bold) {
+      const dt = document.createElement('dt');
+      dt.textContent = labelText + ':';
+      const dd = document.createElement('dd');
+      if (value) {
+        if (bold) dd.style.fontWeight = 'bold';
+        dd.textContent = value;
+      } else {
+        dd.style.color = 'var(--text-hint)';
+        dd.textContent = '—';
+      }
+      metaDl.appendChild(dt);
+      metaDl.appendChild(dd);
     }
-    addMetaRow('Archive Warning', splitTags(warningRaw), 'warning');
-    addMetaRow('Category',        splitTags(categoryRaw), 'category');
+
+    addTextRow('Rating',          rating ? ratingLabel(rating) : '', false);
+    addTextRow('Archive Warning', splitTags(warningRaw).join(', '), true);
+    addMetaRow('Categories',      splitTags(categoryRaw), 'category');
     addMetaRow('Fandom',          splitTags(fandomRaw), '');
-    addMetaRow('Relationship',    splitTags(relRaw), '');
+    addMetaRow('Relationships',   splitTags(relRaw), '');
     addMetaRow('Characters',      splitTags(charRaw), '');
     addMetaRow('Additional Tags', splitTags(tagsRaw), 'freeform');
+    addTextRow('Language',        language, false);
 
-    // Stats
-    document.getElementById('disp-stats').innerHTML = `
-      <dt>Words:</dt><dd>${totalChars.toLocaleString('zh-CN')}</dd>
-      <dt>Chapters:</dt><dd>${chapters.length}/${chapters.length}</dd>
-    `;
+    // Stats：以两列格式追加到 work-meta 里，和 Rating 等字段保持一致
+    // Stats：作为单独一行，右侧横排显示各项数据
+    (function() {
+      const dt = document.createElement('dt');
+      dt.textContent = 'Stats:';
+      const dd = document.createElement('dd');
+      // 构建横排内容
+      const items = [];
+      if (published) items.push({ label: 'Published', value: escapeHtml(published) });
+      items.push({ label: 'Words',     value: totalChars.toLocaleString('zh-CN') });
+      items.push({ label: 'Chapters',  value: chapters.length + '/' + chapters.length });
+      items.push({ label: 'Comments',  value: '0' });
+      items.push({ label: 'Kudos',     value: '0' });
+      items.push({ label: 'Bookmarks', value: '0' });
+      items.push({ label: 'Hits',      value: '0' });
+      dd.style.flexWrap = 'wrap';
+      dd.style.display = 'flex';
+      dd.innerHTML = items.map(it =>
+        `<span style="margin-right:14px;margin-bottom:2px;white-space:nowrap"><strong>${it.label}:</strong> ${it.value}</span>`
+      ).join('');
+      metaDl.appendChild(dt);
+      metaDl.appendChild(dd);
+    })();
 
     // Summary / Notes
     if (summary) {
