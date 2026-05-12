@@ -89,7 +89,7 @@
   #inner {
     display: flex; gap: 0; align-items: flex-start;
     padding: 0 20px 60px;
-    max-width: 900px;
+    max-width: 72em;
     margin: 0 auto;
   }
   #main { flex: 1; min-width: 0; padding-top: 16px; }
@@ -196,7 +196,7 @@
   /* 阅读页整体容器：居中，最大900px */
   #work-section {
     display: none;
-    max-width: 900px;
+    max-width: 72em;
     margin: 0 auto;
     padding: 0 20px;
   }
@@ -284,7 +284,8 @@
     border: 1px solid var(--border);
     border-radius: 3px;
     padding: 16px 20px;
-    margin: 0 40px 0;
+    margin: 0 auto;
+    max-width: 72em;
     box-shadow: 1px 2px 6px rgba(0,0,0,0.08);
   }
 
@@ -353,7 +354,7 @@ dl.work-meta dd ul li:last-child::after { content: ''; }
   .work-title-block {
     text-align: center;
     padding: 28px 20px 16px;
-    max-width: 900px;
+    max-width: 72em;
     margin: 0 auto;
   }
   .work-title {
@@ -372,7 +373,7 @@ dl.work-meta dd ul li:last-child::after { content: ''; }
   /* ── Summary / Notes 模块 ── */
   /* 参考截图：左边一条竖线，标题加粗，内容缩进 */
   .preface-module {
-    max-width: 900px;
+    max-width: 72em;
     margin: 0 auto 12px;
     padding: 0 20px;
   }
@@ -400,7 +401,7 @@ dl.work-meta dd ul li:last-child::after { content: ''; }
 
   /* ── 正文区（无边框、无卡片） ── */
   .chapter-content {
-    max-width: 900px;
+    max-width: 72em;
     margin: 0 auto;
     padding: 16px 20px 32px;
   }
@@ -412,10 +413,9 @@ dl.work-meta dd ul li:last-child::after { content: ''; }
     border-bottom: 1px solid var(--border-light);
     text-align: center;
   }
-  .chapter-body { font-family: var(--font-serif); }
-  .chapter-body p {
-    font-size: 16px; line-height: 1.85; color: var(--text);
-    margin-bottom: 1.3em; text-align: justify;
+  .chapter-body { font-family: 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 1em; }.chapter-body p {
+    line-height: 1.5; color: var(--text);
+    margin: 1.286em auto; text-align: justify;
   }
   .chapter-body p:last-child { margin-bottom: 0; }
   .chapter-body h1, .chapter-body h2, .chapter-body h3 {
