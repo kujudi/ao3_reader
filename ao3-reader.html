@@ -210,9 +210,8 @@
     justify-content: flex-end;
     flex-wrap: wrap;
     gap: 6px;
-    padding: 8px 20px;
-    max-width: 900px;
-    margin: 0 auto;
+    padding: 8px 40px;
+    margin: 0;
   }
   /* 底部按钮栏额外上边距 */
   #work-nav-bar-bottom {
@@ -280,8 +279,7 @@
     border: 1px solid var(--border);
     border-radius: 3px;
     padding: 16px 20px;
-    max-width: 900px;
-    margin: 0 auto 0;
+    margin: 0 40px 0;
     box-shadow: 1px 2px 6px rgba(0,0,0,0.08);
   }
 
@@ -392,9 +390,8 @@
 
   /* ── Comments 区 ── */
   .comments-section {
-    max-width: 900px;
-    margin: 0 auto 20px;
-    padding: 0 20px;
+    margin: 0 40px 20px;
+    padding: 0;
   }
   .comments-box {
     border: 1px solid var(--border);
@@ -679,48 +676,49 @@
           <div class="chapter-body" id="chapter-body"></div>
         </div>
 
-        <!-- 底部按钮栏（↑ Top / ← Prev / Kudos / Next → / Comments） -->
-        <div class="work-nav-bar" id="work-nav-bar-bottom" style="display:none">
-          <button class="wnb-btn" onclick="scrollToTop()">↑ Top</button>
-          <button class="wnb-btn" id="wnb-prev" style="display:none" onclick="goChapter(-1)">← Previous Chapter</button>
-          <button class="wnb-btn" id="wnb-kudos" onclick="doKudos()">♡ Kudos</button>
-          <button class="wnb-btn" id="wnb-next" style="display:none" onclick="goChapter(1)">Next Chapter →</button>
-          <button class="wnb-btn" onclick="scrollToComments()">Comments</button>
-        </div>
-
-        <!-- Comments 区 -->
-        <div class="comments-section" id="comments-section">
-          <div class="comments-box">
-            <div class="comments-box-header">Comments</div>
-            <div class="comments-box-body">
-              <div class="comments-placeholder">暂无评论</div>
-              <!-- 留言表单 -->
-              <div class="comment-form" id="comment-form">
-                <p>All fields are required. Your email address will not be published.</p>
-                <label>Guest name</label>
-                <input type="text" id="comment-name" placeholder="">
-                <label>Guest email</label>
-                <input type="email" id="comment-email" placeholder="">
-                <label>Comment</label>
-                <textarea id="comment-text" maxlength="10000"
-                  oninput="updateCharCount()"></textarea>
-                <div class="char-count"><span id="char-count">10000</span> characters left</div>
-                <div class="comment-form-footer">
-                  <button class="comment-submit-btn" onclick="submitComment()">Comment</button>
-                </div>
-              </div>
-              <!-- 提交成功提示 -->
-              <div class="comment-submitted" id="comment-submitted">
-                感谢你的留言！（本地演示，留言不会真正保存）
-              </div>
-            </div>
-          </div>
-        </div>
-
       </div><!-- /work-section -->
 
     </div><!-- /main -->
   </div><!-- /inner -->
+
+  <!-- 底部按钮栏（移出 #inner，与元数据框同级） -->
+  <div class="work-nav-bar" id="work-nav-bar-bottom" style="display:none">
+    <button class="wnb-btn" onclick="scrollToTop()">↑ Top</button>
+    <button class="wnb-btn" id="wnb-prev" style="display:none" onclick="goChapter(-1)">← Previous Chapter</button>
+    <button class="wnb-btn" id="wnb-kudos" onclick="doKudos()">♡ Kudos</button>
+    <button class="wnb-btn" id="wnb-next" style="display:none" onclick="goChapter(1)">Next Chapter →</button>
+    <button class="wnb-btn" onclick="scrollToComments()">Comments</button>
+  </div>
+
+  <!-- Comments 区（移出 #inner，与元数据框同级） -->
+  <div class="comments-section" id="comments-section" style="display:none">
+    <div class="comments-box">
+      <div class="comments-box-header">Comments</div>
+      <div class="comments-box-body">
+        <div class="comments-placeholder">暂无评论</div>
+        <!-- 留言表单 -->
+        <div class="comment-form" id="comment-form">
+          <p>All fields are required. Your email address will not be published.</p>
+          <label>Guest name</label>
+          <input type="text" id="comment-name" placeholder="">
+          <label>Guest email</label>
+          <input type="email" id="comment-email" placeholder="">
+          <label>Comment</label>
+          <textarea id="comment-text" maxlength="10000"
+            oninput="updateCharCount()"></textarea>
+          <div class="char-count"><span id="char-count">10000</span> characters left</div>
+          <div class="comment-form-footer">
+            <button class="comment-submit-btn" onclick="submitComment()">Comment</button>
+          </div>
+        </div>
+        <!-- 提交成功提示 -->
+        <div class="comment-submitted" id="comment-submitted">
+          感谢你的留言！（本地演示，留言不会真正保存）
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /outer -->
 
 <div id="footer">
@@ -1249,6 +1247,7 @@
     document.getElementById('work-meta-wrap').style.display = 'block';
     document.getElementById('work-nav-bar-top').style.display    = 'flex';
     document.getElementById('work-nav-bar-bottom').style.display = 'flex';
+    document.getElementById('comments-section').style.display   = 'block';
     document.getElementById('breadcrumb').innerHTML = '';
     document.getElementById('inner').classList.add('reading-mode');
     window.scrollTo(0, 0);
@@ -1260,6 +1259,7 @@
     document.getElementById('work-meta-wrap').style.display = 'none';
     document.getElementById('work-nav-bar-top').style.display    = 'none';
     document.getElementById('work-nav-bar-bottom').style.display = 'none';
+    document.getElementById('comments-section').style.display   = 'none';
     document.getElementById('breadcrumb').innerHTML =
       `<a href="#" onclick="showUpload(); return false;">Home</a> &rsaquo; 上传文章`;
     document.getElementById('inner').classList.remove('reading-mode');
