@@ -20,11 +20,6 @@
     --text-hint: #999999;
     --link: #2a5a8e;
     --link-red: #990000;
-    --tag-bg: #e8e8e4;
-    --tag-border: #c8c8c0;
-    --tag-free-bg: #e8f4f8;
-    --tag-free-border: #90c8d8;
-    --tag-free-text: #1a6080;
     --font-serif: Georgia, 'Times New Roman', serif;
     --font-sans: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
   }
@@ -66,10 +61,13 @@
   .site-title:hover { text-decoration: none; }
 
   /* 主导航栏 */
-  .primary-nav {
-    background: var(--red-nav);
-    border-bottom: 2px solid #550000;
-  }
+.primary-nav {
+    background: #900;
+    border-bottom: none;
+    box-shadow: inset 0 -6px 10px rgba(0,0,0,0.35),
+                1px 1px 3px -1px rgba(0,0,0,0.25),
+                inset 0 -1px 0 rgba(0,0,0,0.85);
+}
   .primary-nav ul {
     padding: 0 20px;
     display: flex; list-style: none; align-items: stretch;
@@ -219,21 +217,28 @@
   }
 
   /* 按钮统一样式（模拟AO3的灰色渐变按钮） */
-  .wnb-btn {
-    background: linear-gradient(to bottom, #ffffff, #d8d8d8);
-    border: 1px solid #b0b0b0;
-    color: var(--text);
+.wnb-btn {
+    background: #eee;
+    background-image: linear-gradient(#fff 2%, #ddd 95%, #bbb 100%);
+    border: 1px solid #bbb;
+    border-bottom-color: #aaa;
+    color: #444;
     font-size: 13px;
     font-family: var(--font-sans);
     padding: 5px 14px;
     border-radius: 4px;
     cursor: pointer;
     white-space: nowrap;
-    position: relative; /* 给下拉菜单做定位锚点 */
-  }
-  .wnb-btn:hover {
-    background: linear-gradient(to bottom, #f0f0f0, #c8c8c8);
-  }
+    position: relative;
+}
+.wnb-btn:hover {
+    color: #900;
+    border-top-color: #999;
+    border-left-color: #999;
+    box-shadow: inset 2px 2px 2px #bbb;
+    background-image: linear-gradient(#fff 2%, #ddd 95%, #bbb 100%);
+}
+/* ── 改到这里 ── */
 
   /* ── Chapter Index 下拉菜单 ── */
   .chapter-index-wrap {
@@ -283,37 +288,66 @@
     box-shadow: 1px 2px 6px rgba(0,0,0,0.08);
   }
 
-  dl.work-meta {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 4px 10px;
+  /* ── 改这段 ── */
+dl.work-meta {
     font-size: 13px;
-    align-items: baseline;
-  }
-  dl.work-meta dt {
-    font-weight: bold; color: var(--text-muted);
-    white-space: nowrap; padding-right: 4px; text-align: left;
-  }
-  dl.work-meta dd { color: var(--text); }
-  dl.work-meta dd ul { list-style: none; display: flex; flex-wrap: wrap; gap: 4px; }
-  dl.work-meta dd ul li { display: inline; }
-  dl.work-meta dd ul li::after { content: ',\00a0'; color: var(--text-muted); }
-  dl.work-meta dd ul li:last-child::after { content: ''; }
+    overflow: hidden;
+}
+dl.work-meta dt {
+    font-weight: bold;
+    color: var(--text-muted);
+    float: left;
+    clear: left;
+    min-width: 10.5em;
+    width: 25%;
+    padding: 0.25em 0.5em 0 0;
+}
+dl.work-meta dd {
+    float: left;
+    width: 72.5%;
+    margin: 0 0 0.4em;
+    color: var(--text);
+}
+dl.work-meta dd ul { list-style: none; }
+dl.work-meta dd ul li { display: inline; }
+dl.work-meta dd ul li::after { content: ',\00a0'; color: var(--text-muted); }
+dl.work-meta dd ul li:last-child::after { content: ''; }
+/* ── 改到这里 ── */
 
-  .tag-link {
-    display: inline-block;
-    background: var(--tag-bg); border: 1px solid var(--tag-border);
-    color: var(--text); padding: 1px 6px; border-radius: 2px;
-    font-size: 12px; text-decoration: none; white-space: nowrap;
-    margin: 1px 2px 1px 0;
-  }
-  .tag-link:hover { background: #d8d8d0; text-decoration: none; }
-  .tag-link.freeform {
-    background: var(--tag-free-bg); border-color: var(--tag-free-border);
-    color: var(--tag-free-text);
-  }
-  .tag-link.freeform:hover { background: #d0e8f0; }
-  .tag-link.category { background: #f0e8f5; border-color: #b090c8; color: #5a2a7a; }
+  /* ── 改这段 ── */
+.tag-link {
+    display: inline;
+    background: transparent;
+    border: none;
+    border-bottom: 1px dotted;
+    color: #111;
+    padding: 0;
+    font-size: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+    margin: 0 0.25em 0 0;
+}
+.tag-link:hover {
+    background: #900;
+    color: #fff;
+    border-bottom-color: transparent;
+    text-decoration: none;
+}
+.tag-link.freeform {
+    color: #111;
+}
+.tag-link.freeform:hover {
+    background: #900;
+    color: #fff;
+}
+.tag-link.category {
+    color: #111;
+}
+.tag-link.category:hover {
+    background: #900;
+    color: #fff;
+}
+/* ── 改到这里 ── */
 
   /* ── 大标题 + 作者（元数据框下方，居中） ── */
   .work-title-block {
@@ -438,18 +472,28 @@
     font-size: 11px; color: var(--text-hint);
     text-align: right; margin-top: 3px;
   }
-  .comment-submit-btn {
+  /* ── 改这段 ── */
+.comment-submit-btn {
     margin-top: 12px;
-    background: linear-gradient(to bottom, #ffffff, #d8d8d8);
-    border: 1px solid #b0b0b0;
-    color: var(--text); font-size: 13px;
+    background: #eee;
+    background-image: linear-gradient(#fff 2%, #ddd 95%, #bbb 100%);
+    border: 1px solid #bbb;
+    border-bottom-color: #aaa;
+    color: #444;
+    font-size: 13px;
     font-family: var(--font-sans);
-    padding: 5px 18px; border-radius: 4px;
-    cursor: pointer; float: right;
-  }
-  .comment-submit-btn:hover {
-    background: linear-gradient(to bottom, #f0f0f0, #c8c8c8);
-  }
+    padding: 5px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    float: right;
+}
+.comment-submit-btn:hover {
+    color: #900;
+    border-top-color: #999;
+    border-left-color: #999;
+    box-shadow: inset 2px 2px 2px #bbb;
+}
+/* ── 改到这里 ── */
   .comment-form-footer { overflow: hidden; }
 
   /* 已提交留言提示 */
