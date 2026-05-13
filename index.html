@@ -1216,18 +1216,19 @@ document.getElementById('meta-author').value = metaAuthor || '';
     const lines = text.split('\n');
 
     // 章节标题判定正则：覆盖常见中英文格式
-    const titleRe = /^[\s　]*(?:第\s*[〇零一二三四五六七八九十百千万\d]+\s*[章节回幕折部卷篇集]+|chapter\s+\d+|part\s+\d+|volume\s+\d+|vol\.?\s*\d+|序章|终章|尾声|番外|后记|前言|楔子|\d{1,4}[\.、\s]|[一二三四五六七八九十百]+[、\.\s：]|[（(]\s*[一二三四五六七八九十百千\d]+\s*[）)]|【[^】]{1,10}】)/i;
+    // 注意：第\s*X\s*章 支持"第 1 章"这种中间有空格的写法
+    const titleRe = /^[\s　]*(?:第\s*[〇零一二三四五六七八九十百千万\d]+\s*[章节回幕折部卷篇集]+|chapter\s*\d+|part\s*\d+|volume\s*\d+|vol\.?\s*\d+|序章|终章|尾声|番外|后记|前言|楔子|\d{1,4}[\.、]|[一二三四五六七八九十百]+[、\.\s：]|[（(]\s*[一二三四五六七八九十百千\d]+\s*[）)]|【[^】]{1,10}】)/i;
 
     // 找出所有候选标题行的索引
     const candidates = [];
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line) continue;
-      // 标题行要短（中文小说章节标题一般不超过40字）
+      // 标题行要短
       if (line.length > 60) continue;
       if (!titleRe.test(line)) continue;
 
-      // 前后至少一侧有空行，或是文件首行，增强置信度
+      // 前后至少一侧有空行，增强置信度
       const prevEmpty = i === 0 || lines[i - 1].trim() === '';
       const nextEmpty = i === lines.length - 1 || lines[i + 1].trim() === '';
       if (prevEmpty || nextEmpty) {
@@ -1240,6 +1241,17 @@ document.getElementById('meta-author').value = metaAuthor || '';
 
     // 按候选标题行切分
     const result = [];
+
+    // 第一个章节标题之前如果有内容，作为第一章保留（标题用文件开头第一个非空行，或留空）
+    const firstTitleIdx = candidates[0];
+    const preLines = lines.slice(0, firstTitleIdx);
+    const preBody = preLines.join('\n').trim();
+    if (preBody.length > 20) {
+      // 取前几行里第一个有实质内容的行作为标题，找不到就用空字符串
+      const preTitle = preLines.find(l => l.trim().length > 0 && l.trim().length < 40)?.trim() || '';
+      result.push({ title: preTitle, body: preBody });
+    }
+
     for (let ci = 0; ci < candidates.length; ci++) {
       const titleLineIdx = candidates[ci];
       const nextTitleIdx = ci + 1 < candidates.length ? candidates[ci + 1] : lines.length;
