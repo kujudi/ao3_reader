@@ -441,30 +441,30 @@
 /* ── 大标题 + 作者（元数据框下方，居中） ── 止 */
 
   /* ── Summary / Notes 模块 ── */
-  /* 参考截图：左边一条竖线，标题加粗，内容缩进 */
   .preface-module {
     max-width: 72em;
     margin: 0 auto 12px;
     padding: 0 20px;
   }
   .preface-module-inner {
-    border-left: 3px solid #cccccc;
-    padding: 10px 16px;
-    background: var(--bg-inner);
+    padding: 10px 0;
   }
   .preface-module.summary .preface-module-inner {
-    border-left-color: var(--red);
+    border-left: none;
+    background: none;
   }
   .preface-module h3 {
-    font-size: 13px; font-weight: bold;
-    color: var(--text-muted);
-    margin-bottom: 6px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 4px;
+    font-family: Georgia, serif;
+    font-size: 19px;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--text);
+    padding-bottom: 6px;
   }
   .preface-module p, .preface-module blockquote {
     font-family: var(--font-serif);
-    font-size: 14px; color: #444;
+    font-size: 15px; color: #444;
     line-height: 1.75;
     white-space: pre-wrap;
   }
@@ -1456,9 +1456,13 @@ document.getElementById('meta-author').value = metaAuthor || '';
     // ── Summary / Notes ──
     if (summary) {
       document.getElementById('disp-summary').textContent = summary;
-      document.getElementById('disp-summary-box').style.display = 'block';
+      const sb = document.getElementById('disp-summary-box');
+      sb.dataset.hasSummary = '1';
+      sb.style.display = 'block';
     } else {
-      document.getElementById('disp-summary-box').style.display = 'none';
+      const sb = document.getElementById('disp-summary-box');
+      sb.dataset.hasSummary = '0';
+      sb.style.display = 'none';
     }
     if (notes) {
       document.getElementById('disp-notes').textContent = notes;
@@ -1524,6 +1528,10 @@ document.getElementById('meta-author').value = metaAuthor || '';
     headingEl.style.display = chapters.length > 1 ? 'block' : 'none';
 
     document.getElementById('chapter-body').innerHTML = textToHtml(ch.body);
+
+    // Summary 只在第一章显示
+    const summaryBox = document.getElementById('disp-summary-box');
+    if (summaryBox) summaryBox.style.display = (idx === 0 && summaryBox.dataset.hasSummary === '1') ? 'block' : 'none';
 
     // 更新 Chapter Index 下拉高亮当前章节
     document.querySelectorAll('#chapter-index-dropdown a').forEach((a, i) => {
