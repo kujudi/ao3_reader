@@ -636,6 +636,7 @@
     /* 元数据 dt/dd 纵排 */
     dl.work-meta dt,
     dl.work-meta dd { float: none; width: 100%; clear: both; min-width: 0; }
+    dl.work-meta dd { padding-left: 1em; }
 
      /* 章节导航栏：收紧边距 */
     .work-nav-bar { padding: 8px 12px; }
@@ -667,6 +668,38 @@
     .comment-form dt,
     .comment-form dd { float: none; width: 100%; clear: both; min-width: 0; }
   }
+
+  /* ── 分章确认弹窗 ── */
+  #chapter-modal {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,0.45);
+    display: flex; align-items: center; justify-content: center;
+  }
+  #chapter-modal-box {
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.22);
+    padding: 32px 36px 28px;
+    max-width: 480px; width: 90%;
+    text-align: center;
+  }
+  #chapter-modal-icon { font-size: 32px; margin-bottom: 12px; }
+  #chapter-modal-title { font-size: 18px; color: var(--text); margin-bottom: 10px; }
+  #chapter-modal-preview {
+    font-size: 13px; color: var(--text-muted);
+    background: var(--bg-inner); border-radius: 4px;
+    padding: 8px 12px; margin-bottom: 22px;
+    line-height: 1.6; word-break: break-all;
+  }
+  #chapter-modal-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .cm-btn {
+    padding: 8px 20px; border-radius: 4px; border: none;
+    font-size: 14px; cursor: pointer; font-family: var(--font-sans);
+    transition: opacity .15s;
+  }
+  .cm-btn:hover { opacity: 0.85; }
+  .cm-btn-primary { background: var(--red); color: #fff; }
+  .cm-btn-secondary { background: #e8e8e8; color: var(--text); }
 </style>
 </head>
 <body>
@@ -843,21 +876,10 @@
 
             </div><!-- /ao3-form-table -->
 
-            <div class="form-section-title">章节设置</div>
-            <div class="ao3-form-table">
-              <div class="ao3-row" id="sep-field">
-                <div class="ao3-label">章节分隔符 <span class="optional">（选填）</span></div>
-                <div class="ao3-control">
-                  <input type="text" id="meta-sep" placeholder="例：第X章 · 或 === 或 ---">
-                  <div class="hint">填入的字符串会作为章节起始标记，支持正则</div>
-                </div>
-              </div>
-            </div>
-
           </div><!-- /meta-form -->
 
           <div style="display:flex; justify-content:flex-end; margin-top:16px;">
-            <button class="wnb-btn render-btn" id="render-btn" onclick="renderWork()" disabled>渲 染</button>
+            <button class="wnb-btn render-btn" id="render-btn" onclick="onClickRender()" disabled>渲 染</button>
           </div>
 
         </div><!-- /section-body -->
@@ -1011,9 +1033,6 @@ return ctor.prototype=parent.prototype,child.prototype=new ctor,child.__super__=
       return;
     }
     epubChapters = null;
-    // epub 和 docx 不需要分隔符字段
-    document.getElementById('sep-field').style.display =
-      (ext === 'epub' || ext === 'docx') ? 'none' : '';
 
     if (ext === 'epub') {
       handleEpub(file);
@@ -1191,6 +1210,120 @@ document.getElementById('meta-author').value = metaAuthor || '';
     return (bytes/1024/1024).toFixed(2) + ' MB';
   }
 
+  // ── 自动分章检测 ──
+  // 扫描纯文本，返回章节数组（{title, body}[]）或 null（检测不到）
+  function autoDetectChapters(text) {
+    const lines = text.split('\n');
+
+    // 章节标题判定正则：覆盖常见中英文格式
+    const titleRe = /^[\s　]*(?:第\s*[〇零一二三四五六七八九十百千万\d]+\s*[章节回幕折部卷篇集]+|chapter\s+\d+|part\s+\d+|volume\s+\d+|vol\.?\s*\d+|序章|终章|尾声|番外|后记|前言|楔子|\d{1,4}[\.、\s]|[一二三四五六七八九十百]+[、\.\s：]|[（(]\s*[一二三四五六七八九十百千\d]+\s*[）)]|【[^】]{1,10}】)/i;
+
+    // 找出所有候选标题行的索引
+    const candidates = [];
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      // 标题行要短（中文小说章节标题一般不超过40字）
+      if (line.length > 60) continue;
+      if (!titleRe.test(line)) continue;
+
+      // 前后至少一侧有空行，或是文件首行，增强置信度
+      const prevEmpty = i === 0 || lines[i - 1].trim() === '';
+      const nextEmpty = i === lines.length - 1 || lines[i + 1].trim() === '';
+      if (prevEmpty || nextEmpty) {
+        candidates.push(i);
+      }
+    }
+
+    // 少于2个候选，不分章
+    if (candidates.length < 2) return null;
+
+    // 按候选标题行切分
+    const result = [];
+    for (let ci = 0; ci < candidates.length; ci++) {
+      const titleLineIdx = candidates[ci];
+      const nextTitleIdx = ci + 1 < candidates.length ? candidates[ci + 1] : lines.length;
+      const title = lines[titleLineIdx].trim();
+      const bodyLines = lines.slice(titleLineIdx + 1, nextTitleIdx);
+      const body = bodyLines.join('\n').trim();
+      // 过滤掉正文太短的（可能是误判）
+      if (body.length < 20 && ci < candidates.length - 1) continue;
+      result.push({ title, body });
+    }
+
+    // 最终要有至少2章才算检测成功
+    return result.length >= 2 ? result : null;
+  }
+
+  // ── 点击「渲染」按钮时的入口 ──
+  function onClickRender() {
+    // epub 直接渲染，不需要分章弹窗
+    if (epubChapters) {
+      renderWork();
+      return;
+    }
+    if (!rawText) return;
+
+    const detected = autoDetectChapters(rawText);
+
+    if (detected) {
+      // 有检测结果，弹窗让用户选择
+      showChapterModal(detected);
+    } else {
+      // 检测不到章节，直接整篇渲染
+      chapters = [{ title: '', body: rawText }];
+      renderWork();
+    }
+  }
+
+  // ── 分章确认弹窗 ──
+  function showChapterModal(detected) {
+    // 移除旧弹窗（防重复）
+    const old = document.getElementById('chapter-modal');
+    if (old) old.remove();
+
+    // 预览：最多显示5章标题
+    const previewTitles = detected.slice(0, 5).map(c => c.title).join(' · ');
+    const moreHint = detected.length > 5 ? ` … 共 ${detected.length} 章` : '';
+
+    const modal = document.createElement('div');
+    modal.id = 'chapter-modal';
+    modal.innerHTML = `
+      <div id="chapter-modal-box">
+        <div id="chapter-modal-title">检测到 <strong>${detected.length}</strong> 章</div>
+        <div id="chapter-modal-preview">${escapeHtml(previewTitles)}${moreHint}</div>
+        <div id="chapter-modal-btns">
+          <button class="cm-btn cm-btn-primary" id="cm-btn-auto">按检测结果分章</button>
+          <button class="cm-btn cm-btn-secondary" id="cm-btn-single">整篇不分章</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    // 按检测结果分章
+    document.getElementById('cm-btn-auto').onclick = () => {
+      chapters = detected;
+      modal.remove();
+      renderWork();
+    };
+
+    // 整篇不分章
+    document.getElementById('cm-btn-single').onclick = () => {
+      chapters = [{ title: '', body: rawText }];
+      modal.remove();
+      renderWork();
+    };
+
+    // 点遮罩关闭（等同整篇）
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        chapters = [{ title: '', body: rawText }];
+        modal.remove();
+        renderWork();
+      }
+    };
+  }
+
   // ── 渲染 ──
   function renderWork() {
     const title        = document.getElementById('meta-title').value.trim() || '未命名作品';
@@ -1212,7 +1345,7 @@ document.getElementById('meta-author').value = metaAuthor || '';
 
     const splitTags = str => str ? str.split(/[,，、]/).map(t => t.trim()).filter(Boolean) : [];
 
-    // 处理章节
+    // 处理章节（chapters 由外部 onClickRender 传入）
     if (epubChapters) {
       chapters = epubChapters.map((ch, i) => ({
         title: ch.title || `Chapter ${i + 1}`,
@@ -1220,25 +1353,7 @@ document.getElementById('meta-author').value = metaAuthor || '';
       }));
     } else {
       if (!rawText) return;
-      const sepRaw = document.getElementById('meta-sep').value.trim();
-      if (sepRaw) {
-        const sepRegex = new RegExp(`(?=^${escapeRegex(sepRaw)})`, 'mi');
-        chapters = rawText.split(sepRegex).map(s => s.trim()).filter(s => s.length > 10);
-        if (chapters.length === 0) chapters = [rawText];
-      } else {
-        chapters = [rawText];
-      }
-      chapters = chapters.map((text, i) => {
-        const firstLine = text.split('\n')[0].trim();
-        let chTitle = '';
-        if (firstLine.length < 60 && /第.{1,4}[章节幕]|chapter|part|\d+\./i.test(firstLine)) {
-          chTitle = firstLine;
-          text = text.slice(firstLine.length).trim();
-        } else {
-          chTitle = chapters.length === 1 ? '' : `Chapter ${i + 1}`;
-        }
-        return { title: chTitle, body: text };
-      });
+      // chapters 已由调用方设置好，直接使用
     }
 
     // 统计字数
@@ -1300,7 +1415,6 @@ document.getElementById('meta-author').value = metaAuthor || '';
     addMetaRow('Relationships',   splitTags(relRaw), '');
     addMetaRow('Characters',      splitTags(charRaw), '');
     addMetaRow('Additional Tags', splitTags(tagsRaw), 'freeform');
-    addTextRow('Language',        language, false);
 
     // Stats 行（仿 AO3 .meta .stats dl 浮动布局）
     (function() {
@@ -1310,13 +1424,10 @@ document.getElementById('meta-author').value = metaAuthor || '';
       dd.className = 'stats';
       const statsDl = document.createElement('dl');
       const items = [];
-      if (published) items.push({ label: 'Published', value: escapeHtml(published) });
+      const displayDate = published || '1900-01-01';
+      items.push({ label: 'Published', value: escapeHtml(displayDate) });
       items.push({ label: 'Words',     value: totalChars.toLocaleString('zh-CN') });
       items.push({ label: 'Chapters',  value: chapters.length + '/' + chapters.length });
-      items.push({ label: 'Comments',  value: '0' });
-      items.push({ label: 'Kudos',     value: '0' });
-      items.push({ label: 'Bookmarks', value: '0' });
-      items.push({ label: 'Hits',      value: '0' });
       items.forEach(it => {
         const statDt = document.createElement('dt');
         statDt.textContent = it.label + ':';
